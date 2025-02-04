@@ -7,14 +7,11 @@ It can be used with multiple quantum computing frameworks, including `Qiskit <ht
 Installation
 *************
 
-To install ``ucc`` run:
+To install ``ucc`` run
 
 .. code:: bash
 
-   git clone https://github.com/unitaryfund/ucc.git
-   cd ucc
-   pip install -e . # Editable mode
-
+   pip install ucc
 
 UCC requires Python version :math:`\ge` 3.12. 
 

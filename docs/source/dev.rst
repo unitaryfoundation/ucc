@@ -12,7 +12,7 @@ Cutting a release
 To release a new version of ``ucc`` on GitHub, follow the steps below.
 
 1. **Bump the Version:**
-    - Increment the version in ``VERSION.txt`` according to `semantic versioning <https://semver.org/>`_.
+    - Increment the version in ``pyproject.toml`` according to `semantic versioning <https://semver.org/>`_.
 
 2. **Update the Changelog:**
     - Update the ``CHANGELOG.rst`` file with all new changes, improvements, and bug fixes since the previous release.

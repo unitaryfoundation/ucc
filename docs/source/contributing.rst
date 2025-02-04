@@ -13,14 +13,17 @@ The rest of this document describes the technical details of getting set up to d
 Setting up your development environment
 ---------------------------------------
 
-We recommend creating a virtual environment to install the required dependencies.
-Once this is set up using the tool of your choice, install the dependencies and ``ucc`` in editable mode by running the following command in the root directory of the repository.
+We leverage `poetry <https://python-poetry.org/>` for packaging and dependency management. 
+After installing poetry, run the following commands to clone the repository, create a poetry managed virtual environment for development, and install dependencies.
 
 .. code:: bash
 
-    pip install -e .
+    git clone https://github.com/unitaryfund/ucc.git
+    cd ucc
+    poetry install
 
-With this set up you can now run tests using
+For all of the following commands, either first run ``poetry shell`` to enable the poetry managed virtual environment,
+or prefix each command with ``poetry run``.
 
 .. code:: bash
 
