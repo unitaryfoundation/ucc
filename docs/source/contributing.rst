@@ -13,24 +13,23 @@ The rest of this document describes the technical details of getting set up to d
 Setting up your development environment
 ---------------------------------------
 
-We recommend creating a virtual environment to install the required dependencies.
-Once this is set up using the tool of your choice, install the dependencies and ``ucc`` in editable mode by running the following command in the root directory of the repository.
+We leverage `uv <https://docs.astral.sh/uv/>` for packaging and dependency management.
+After installing uv, run the following commands to clone the repository, create a uv managed virtual environment for development, and install dependencies.
+
+.. code:: bash
+    git clone https://github.com/unitaryfund/ucc.git
+    cd ucc
+    uv install --all-extras --all-groupsS
 
 .. code:: bash
 
-    pip install -e .
-
-With this set up you can now run tests using
-
-.. code:: bash
-
-    pytest ucc
+    uv run pytest ucc
 
 and build the documentation by changing to the ``docs/source`` directory where you can run
 
 .. code:: bash
 
-    make html
+    uv run make html
 
 The built documentation will then live in ``ucc/docs/source/_build/html``.
 

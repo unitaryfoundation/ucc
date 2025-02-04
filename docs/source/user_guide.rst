@@ -7,16 +7,14 @@ It can be used with multiple quantum computing frameworks, including `Qiskit <ht
 Installation
 *************
 
-To install ``ucc`` run:
+To install the latest version of ``ucc`` from PyPI run:
 
 .. code:: bash
 
-   git clone https://github.com/unitaryfund/ucc.git
-   cd ucc
-   pip install -e . # Editable mode
+    pip install ucc
 
 
-UCC requires Python version ≥ 3.12. 
+UCC requires Python version ≥ 3.12.
 
 Basic usage
 ***********
@@ -68,11 +66,11 @@ The full list of transpiler passes available in UCC can be found in the :doc:`ap
 Customization
 *************
 
-UCC offers different levels of customization, from settings accepted by the "default" pass ``UCCDefault1`` to the ability to add custom transpiler passes. 
+UCC offers different levels of customization, from settings accepted by the "default" pass ``UCCDefault1`` to the ability to add custom transpiler passes.
 
 Transpilation settings
 ======================
-UCC settings can be adjusted using the keyword arguments of the ``ucc.compile()`` function, as shown. 
+UCC settings can be adjusted using the keyword arguments of the ``ucc.compile()`` function, as shown.
 
 .. code:: python
 
@@ -83,7 +81,7 @@ UCC settings can be adjusted using the keyword arguments of the ``ucc.compile()`
    )
 
 
-- ``return_format`` is the format in which the input circuit will be returned, e.g. "TKET" or "OpenQASM2". Check ``ucc.supported_circuit_formats()`` for supported circuit formats. Default is the format of input circuit. 
+- ``return_format`` is the format in which the input circuit will be returned, e.g. "TKET" or "OpenQASM2". Check ``ucc.supported_circuit_formats()`` for supported circuit formats. Default is the format of input circuit.
 - ``target_device`` can be specified as a Qiskit backend or coupling map, or a list of connections between qubits. If None, all-to-all connectivity is assumed. If a Qiskit backend or coupling map is specified, only the coupling list extracted from the backend is used.
 
 Writing a custom pass
@@ -114,7 +112,7 @@ UCC's built-in pass manager ``UCCDefault1().pass_manager`` can be used to apply 
 In the following example we show how to add passes for merging single qubit rotations interrupted by a commuting 2 qubit gate.
 
 .. code:: python
-   
+
    from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
    from qiskit.transpiler.passes import Optimize1qGatesSimpleCommutation
 
@@ -127,7 +125,7 @@ In the following example we show how to add passes for merging single qubit rota
    ucc_compiler = UCCDefault1()
 
    ucc_compiler.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=single_q_basis))
-   ucc_compiler.pass_manager.append(BasisTranslator(sel, target_basis=target_basis)) 
+   ucc_compiler.pass_manager.append(BasisTranslator(sel, target_basis=target_basis))
 
    custom_compiled_circuit = ucc_compiler.run(circuit_to_compile)
 
@@ -149,5 +147,5 @@ A note on terminology
 
 .. important::
    There is some disagreement in the quantum computing community on the proper usage of the terms "transpilation" and "compilation."
-   For instance, Qiskit refers to optimization of the Directed Acyclic Graph (DAG) of a circuit as "transpilation," whereas in qBraid, the 1:1 translation of one circuit representation into another without optimization (e.g. a Cirq circuit to a Qiskit circuit; OpenQASM 2 into PyTKET) is called "transpilation." 
+   For instance, Qiskit refers to optimization of the Directed Acyclic Graph (DAG) of a circuit as "transpilation," whereas in qBraid, the 1:1 translation of one circuit representation into another without optimization (e.g. a Cirq circuit to a Qiskit circuit; OpenQASM 2 into PyTKET) is called "transpilation."
    In addition, Cirq uses the term "transformer" and PyTKET uses :code:`CompilationUnit` to refer to what Qiskit calls a transpiler pass.
