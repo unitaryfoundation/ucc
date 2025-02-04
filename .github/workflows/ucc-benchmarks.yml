@@ -15,13 +15,13 @@ jobs:
   run-benchmarks:
     runs-on: ucc-benchmarks-8-core-U22.04
     if: contains(github.event.head_commit.message, '[benchmark chore]') == false
-    
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.DEPLOY_KEY }}
-          
+
       # Build the Docker image
       - name: Build Docker image
         run: docker build -t ucc-benchmark .
@@ -32,10 +32,9 @@ jobs:
           docker run --rm \
             -v "/home/runner/work/ucc/ucc:/ucc" \
             ucc-benchmark bash -c "
-              source /venv/bin/activate && \
-              ./benchmarks/scripts/run_benchmarks.sh 8 && \
-              python ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
-              python ./benchmarks/scripts/plot_latest_benchmarks.py
+              uv run ./benchmarks/scripts/run_benchmarks.sh 8 && \
+              uv run ./benchmarks/scripts/plot_avg_benchmarks_over_time.py && \
+              uv run ./benchmarks/scripts/plot_latest_benchmarks.py
             "
 
       # Commit and push benchmark results
