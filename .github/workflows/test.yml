@@ -21,10 +21,14 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install Poetry
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
+          pip install poetry
+
+      - name: Install dependencies & ucc
+        run: |
+          poetry install
 
       - name: Run tests
-        run: pytest ucc --verbose
+        run: poetry run pytest ucc --verbose
