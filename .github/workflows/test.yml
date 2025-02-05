@@ -1,3 +1,6 @@
+# This workflow will install Python dependencies, run tests using poetry.
+# It can be tested locally using https://github.com/nektos/act with the command `act push --container-architecture linux/amd64 -j test`
+
 name: Run Tests
 
 on:
