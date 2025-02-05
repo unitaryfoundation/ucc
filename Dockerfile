@@ -12,20 +12,19 @@ WORKDIR /ucc
 # Copy the entire project into the container
 COPY . /ucc
 
-ENV POETRY_NO_INTERACTION=1 \
-POETRY_VIRTUALENVS_IN_PROJECT=1 \
+# Store the virtual env in /venv to avoid clashing with directory
+# mapped as part of benchmark github action
+ENV POETRY_NO_INTERACTION=true \
+POETRY_VIRTUALENVS_IN_PROJECT=false \
 POETRY_VIRTUALENVS_CREATE=true \
-POETRY_CACHE_DIR=/tmp/poetry_cache
+POETRY_CACHE_DIR=/tmp/poetry_cache \
+POETRY_VIRTUALENVS_PATH=/venv
 
 # Install (rarely changing) dependencies only using Poetry to leverage docker caching
 RUN --mount=type=cache,target=/tmp/poetry_cache poetry install --no-root
 
 # Install the `ucc` package itself
 RUN poetry install
-
-# Ensure the virtual environment is properly activated
-ENV VIRTUAL_ENV=/ucc/.venv
-ENV PATH="/ucc/.venv/bin:$PATH"
 
 # Show installed package details
 RUN poetry run pip show ucc

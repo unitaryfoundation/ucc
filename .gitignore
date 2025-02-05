@@ -1,6 +1,8 @@
 .DS_Store
 .vscode
 .python-version
+# local overrides for act github action tests
+.act*
 .idea/
 *.dat
 *.hdf5
