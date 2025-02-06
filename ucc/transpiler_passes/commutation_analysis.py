@@ -1,4 +1,4 @@
-# This file has been modified from the original version in Qiskit. 
+# This file has been modified from the original version in Qiskit.
 
 # This code is part of Qiskit.
 #
@@ -22,7 +22,9 @@ from qiskit.transpiler.basepasses import AnalysisPass
 
 from .commutation_checker import CommutationChecker
 
-from qiskit.circuit._standard_gates_commutations import standard_gates_commutations
+from qiskit.circuit._standard_gates_commutations import (
+    standard_gates_commutations,
+)
 
 
 class CommutationAnalysis(AnalysisPass):
@@ -31,7 +33,7 @@ class CommutationAnalysis(AnalysisPass):
     ``property_set['commutation_set']`` is a dictionary that describes
     the commutation relations on a given wire, all the gates on a wire
     are grouped into a set of gates that commute.
-    
+
     """
 
     def __init__(self, standard_gates=None, special_commutations=None):
@@ -44,18 +46,20 @@ class CommutationAnalysis(AnalysisPass):
         if standard_gates is None:
             new_standard_gates_commutations = standard_gates_commutations
         else:
-            #Iterate over the standard_gates_commutations dictionary, if both standard_gates are in standard_gates, add to new dictionary
+            # Iterate over the standard_gates_commutations dictionary, if both standard_gates are in standard_gates, add to new dictionary
             new_standard_gates_commutations = {}
             for key, value in standard_gates_commutations.items():
                 if key[0] in standard_gates and key[1] in standard_gates:
-                    new_standard_gates_commutations[key] = value            
+                    new_standard_gates_commutations[key] = value
 
         if special_commutations is not None:
-            #Append the special commutations dictionary elements to the commutation checker dictionary
+            # Append the special commutations dictionary elements to the commutation checker dictionary
             for key, value in special_commutations.items():
                 new_standard_gates_commutations[key] = value
 
-        self.comm_checker = CommutationChecker(new_standard_gates_commutations, check_matrix=False)
+        self.comm_checker = CommutationChecker(
+            new_standard_gates_commutations, check_matrix=False
+        )
 
     def run(self, dag):
         """Run the CommutationAnalysis pass on `dag`.
@@ -83,9 +87,7 @@ class CommutationAnalysis(AnalysisPass):
 
         # Construct the commutation set
         for wire in dag.qubits:
-
             for current_gate in dag.nodes_on_wire(wire):
-
                 current_comm_set = self.property_set["commutation_set"][wire]
                 if not current_comm_set:
                     current_comm_set.append([current_gate])
@@ -98,7 +100,9 @@ class CommutationAnalysis(AnalysisPass):
                         does_commute = (
                             isinstance(current_gate, DAGOpNode)
                             and isinstance(prev_gate, DAGOpNode)
-                            and self.comm_checker.commute_nodes(current_gate, prev_gate)
+                            and self.comm_checker.commute_nodes(
+                                current_gate, prev_gate
+                            )
                         )
                         if not does_commute:
                             break
@@ -109,4 +113,6 @@ class CommutationAnalysis(AnalysisPass):
                         current_comm_set.append([current_gate])
 
                 temp_len = len(current_comm_set)
-                self.property_set["commutation_set"][(current_gate, wire)] = temp_len - 1
+                self.property_set["commutation_set"][(current_gate, wire)] = (
+                    temp_len - 1
+                )

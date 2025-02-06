@@ -1,4 +1,4 @@
-# # This file has been modified from the original version in Qiskit. 
+# # This file has been modified from the original version in Qiskit.
 
 # This code is part of Qiskit.
 #
@@ -42,7 +42,13 @@ class CommutativeCancellation(TransformationPass):
         H, X, Y, Z, CX, CY, CZ
     """
 
-    def __init__(self, basis_gates=None, target=None, standard_gates=None, special_commutations=None):
+    def __init__(
+        self,
+        basis_gates=None,
+        target=None,
+        standard_gates=None,
+        special_commutations=None,
+    ):
         """
         CommutativeCancellation initializer.
 
@@ -66,7 +72,12 @@ class CommutativeCancellation(TransformationPass):
             self.basis = set(target.operation_names)
 
         self._var_z_map = {"rz": RZGate, "p": PhaseGate, "u1": U1Gate}
-        self.requires.append(CommutationAnalysis(standard_gates=standard_gates, special_commutations=special_commutations))
+        self.requires.append(
+            CommutationAnalysis(
+                standard_gates=standard_gates,
+                special_commutations=special_commutations,
+            )
+        )
 
     def run(self, dag):
         """Run the CommutativeCancellation pass on `dag`.
@@ -81,12 +92,16 @@ class CommutativeCancellation(TransformationPass):
             TranspilerError: when the 1-qubit rotation gates are not found
         """
         var_z_gate = None
-        z_var_gates = [gate for gate in dag.count_ops().keys() if gate in self._var_z_map]
+        z_var_gates = [
+            gate for gate in dag.count_ops().keys() if gate in self._var_z_map
+        ]
         if z_var_gates:
             # priortize z gates in circuit
             var_z_gate = self._var_z_map[next(iter(z_var_gates))]
         else:
-            z_var_gates = [gate for gate in self.basis if gate in self._var_z_map]
+            z_var_gates = [
+                gate for gate in self.basis if gate in self._var_z_map
+            ]
             if z_var_gates:
                 var_z_gate = self._var_z_map[next(iter(z_var_gates))]
 
@@ -112,11 +127,24 @@ class CommutativeCancellation(TransformationPass):
                 for node in com_set:
                     num_qargs = len(node.qargs)
                     if num_qargs == 1 and node.name in q_gate_list:
-                        cancellation_sets[(node.name, wire, com_set_idx)].append(node)
-                    if num_qargs == 1 and node.name in ["p", "z", "u1", "rz", "t", "s"]:
-                        cancellation_sets[("z_rotation", wire, com_set_idx)].append(node)
+                        cancellation_sets[
+                            (node.name, wire, com_set_idx)
+                        ].append(node)
+                    if num_qargs == 1 and node.name in [
+                        "p",
+                        "z",
+                        "u1",
+                        "rz",
+                        "t",
+                        "s",
+                    ]:
+                        cancellation_sets[
+                            ("z_rotation", wire, com_set_idx)
+                        ].append(node)
                     if num_qargs == 1 and node.name in ["rx", "x"]:
-                        cancellation_sets[("x_rotation", wire, com_set_idx)].append(node)
+                        cancellation_sets[
+                            ("x_rotation", wire, com_set_idx)
+                        ].append(node)
                     # Don't deal with Y rotation, because Y rotation doesn't commute with CNOT, so
                     # it should be dealt with by optimized1qgate pass
                     elif num_qargs == 2 and node.qargs[0] == wire:
@@ -126,7 +154,9 @@ class CommutativeCancellation(TransformationPass):
                             wire,
                             second_qarg,
                             com_set_idx,
-                            self.property_set["commutation_set"][(node, second_qarg)],
+                            self.property_set["commutation_set"][
+                                (node, second_qarg)
+                            ],
                         )
                         cancellation_sets[q2_key].append(node)
 
@@ -139,7 +169,10 @@ class CommutativeCancellation(TransformationPass):
                 for c_node in gates_to_cancel[: (set_len // 2) * 2]:
                     dag.remove_op_node(c_node)
 
-            elif set_len > 1 and cancel_set_key[0] in ["z_rotation", "x_rotation"]:
+            elif set_len > 1 and cancel_set_key[0] in [
+                "z_rotation",
+                "x_rotation",
+            ]:
                 run = cancellation_sets[cancel_set_key]
                 run_qarg = run[0].qargs[0]
                 total_angle = 0.0  # lambda

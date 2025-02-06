@@ -14,6 +14,7 @@
 
 
 """VF2PostLayout pass to find a layout after transpile using subgraph isomorphism"""
+
 from enum import Enum
 import logging
 import inspect
@@ -25,7 +26,9 @@ from rustworkx import PyDiGraph, vf2_mapping, PyGraph
 from qiskit.transpiler.layout import Layout
 from qiskit.transpiler.basepasses import AnalysisPass
 from qiskit.transpiler.exceptions import TranspilerError
-from qiskit.circuit.library.standard_gates import get_standard_gate_name_mapping
+from qiskit.circuit.library.standard_gates import (
+    get_standard_gate_name_mapping,
+)
 from qiskit.transpiler.passes.layout import vf2_utils
 
 
@@ -168,10 +171,16 @@ class VF2PostLayout(AnalysisPass):
 
         result = vf2_utils.build_interaction_graph(dag, self.strict_direction)
         if result is None:
-            self.property_set["VF2PostLayout_stop_reason"] = VF2PostLayoutStopReason.MORE_THAN_2Q
+            self.property_set["VF2PostLayout_stop_reason"] = (
+                VF2PostLayoutStopReason.MORE_THAN_2Q
+            )
             return
-        im_graph, im_graph_node_map, reverse_im_graph_node_map, free_nodes = result
-        scoring_bit_list = vf2_utils.build_bit_list(im_graph, im_graph_node_map)
+        im_graph, im_graph_node_map, reverse_im_graph_node_map, free_nodes = (
+            result
+        )
+        scoring_bit_list = vf2_utils.build_bit_list(
+            im_graph, im_graph_node_map
+        )
         scoring_edge_list = vf2_utils.build_edge_list(im_graph)
 
         if self.target is not None:
@@ -227,8 +236,12 @@ class VF2PostLayout(AnalysisPass):
             # mode the node matcher will not match since none of the circuit ops
             # will match the cmap ops.
             if not self.strict_direction:
-                has_operations = set(itertools.chain.from_iterable(self.target.qargs))
-                to_remove = set(cm_graph.node_indices()).difference(has_operations)
+                has_operations = set(
+                    itertools.chain.from_iterable(self.target.qargs)
+                )
+                to_remove = set(cm_graph.node_indices()).difference(
+                    has_operations
+                )
                 if to_remove:
                     cm_graph.remove_nodes_from(list(to_remove))
         else:
@@ -260,7 +273,9 @@ class VF2PostLayout(AnalysisPass):
         chosen_layout = None
         try:
             if self.strict_direction:
-                initial_layout = Layout({bit: index for index, bit in enumerate(dag.qubits)})
+                initial_layout = Layout(
+                    {bit: index for index, bit in enumerate(dag.qubits)}
+                )
                 chosen_layout_score = self._score_layout(
                     initial_layout,
                     im_graph_node_map,
@@ -299,13 +314,21 @@ class VF2PostLayout(AnalysisPass):
         for mapping in mappings:
             trials += 1
             logger.debug("Running trial: %s", trials)
-            layout_mapping = {im_i: cm_nodes[cm_i] for cm_i, im_i in mapping.items()}
+            layout_mapping = {
+                im_i: cm_nodes[cm_i] for cm_i, im_i in mapping.items()
+            }
             if self.strict_direction:
                 layout = Layout(
-                    {reverse_im_graph_node_map[k]: v for k, v in layout_mapping.items()}
+                    {
+                        reverse_im_graph_node_map[k]: v
+                        for k, v in layout_mapping.items()
+                    }
                 )
                 layout_score = self._score_layout(
-                    layout, im_graph_node_map, reverse_im_graph_node_map, im_graph
+                    layout,
+                    im_graph_node_map,
+                    reverse_im_graph_node_map,
+                    im_graph,
                 )
             else:
                 layout_score = vf2_utils.score_layout(
@@ -321,7 +344,10 @@ class VF2PostLayout(AnalysisPass):
             logger.debug("Trial %s has score %s", trials, layout_score)
             if layout_score < chosen_layout_score:
                 layout = Layout(
-                    {reverse_im_graph_node_map[k]: v for k, v in layout_mapping.items()}
+                    {
+                        reverse_im_graph_node_map[k]: v
+                        for k, v in layout_mapping.items()
+                    }
                 )
                 logger.debug(
                     "Found layout %s has a lower score (%s) than previous best %s (%s)",
@@ -335,7 +361,11 @@ class VF2PostLayout(AnalysisPass):
                 stop_reason = VF2PostLayoutStopReason.SOLUTION_FOUND
 
             if self.max_trials and trials >= self.max_trials:
-                logger.debug("Trial %s is >= configured max trials %s", trials, self.max_trials)
+                logger.debug(
+                    "Trial %s is >= configured max trials %s",
+                    trials,
+                    self.max_trials,
+                )
                 break
 
             elapsed_time = time.time() - start_time
@@ -356,7 +386,9 @@ class VF2PostLayout(AnalysisPass):
             )
             existing_layout = self.property_set["layout"]
             # If any ancillas in initial layout map them back to the final layout output
-            if existing_layout is not None and len(existing_layout) > len(chosen_layout):
+            if existing_layout is not None and len(existing_layout) > len(
+                chosen_layout
+            ):
                 virtual_bits = chosen_layout.get_virtual_bits()
                 used_bits = set(virtual_bits.values())
                 num_qubits = len(cm_graph)
@@ -383,16 +415,25 @@ class VF2PostLayout(AnalysisPass):
             for bit, node_index in bit_map.items():
                 gate_counts = im_graph[node_index]
                 for gate, count in gate_counts.items():
-                    if self.target[gate] is not None and None not in self.target[gate]:
+                    if (
+                        self.target[gate] is not None
+                        and None not in self.target[gate]
+                    ):
                         props = self.target[gate][(bits[bit],)]
                         if props is not None and props.error is not None:
                             fidelity *= (1 - props.error) ** count
 
             for edge in im_graph.edge_index_map().values():
-                qargs = (bits[reverse_bit_map[edge[0]]], bits[reverse_bit_map[edge[1]]])
+                qargs = (
+                    bits[reverse_bit_map[edge[0]]],
+                    bits[reverse_bit_map[edge[1]]],
+                )
                 gate_counts = edge[2]
                 for gate, count in gate_counts.items():
-                    if self.target[gate] is not None and None not in self.target[gate]:
+                    if (
+                        self.target[gate] is not None
+                        and None not in self.target[gate]
+                    ):
                         props = self.target[gate][qargs]
                         if props is not None and props.error is not None:
                             fidelity *= (1 - props.error) ** count
@@ -404,10 +445,13 @@ class VF2PostLayout(AnalysisPass):
                 for gate, count in gate_counts.items():
                     gate_object = gate_name_map[gate]
                     if gate_object.num_qubits > 1:
-                        two_q_gate_penalty += count 
-                          
+                        two_q_gate_penalty += count
+
             for edge in im_graph.edge_index_map().values():
-                qargs = (bits[reverse_bit_map[edge[0]]], bits[reverse_bit_map[edge[1]]])
+                qargs = (
+                    bits[reverse_bit_map[edge[0]]],
+                    bits[reverse_bit_map[edge[1]]],
+                )
                 gate_counts = edge[2]
                 for gate, count in gate_counts.items():
                     gate_object = gate_name_map[gate]

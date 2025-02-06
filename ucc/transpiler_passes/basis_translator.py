@@ -103,7 +103,9 @@ class BasisTranslator(TransformationPass):
     section of the Qiskit docs for details on adding custom equivalence rules.
     """
 
-    def __init__(self, equivalence_library, target_basis, target=None, min_qubits=0):
+    def __init__(
+        self, equivalence_library, target_basis, target=None, min_qubits=0
+    ):
         """Initialize a BasisTranslator instance.
 
         Args:
@@ -124,7 +126,9 @@ class BasisTranslator(TransformationPass):
         self._qargs_with_non_global_operation = {}
         self._min_qubits = min_qubits
         if target is not None:
-            self._non_global_operations = self._target.get_non_global_operation_names()
+            self._non_global_operations = (
+                self._target.get_non_global_operation_names()
+            )
             self._qargs_with_non_global_operation = defaultdict(set)
             for gate in self._non_global_operations:
                 for qarg in self._target[gate]:
@@ -149,20 +153,34 @@ class BasisTranslator(TransformationPass):
 
         # Names of instructions assumed to supported by any backend.
         if self._target is None:
-            basic_instrs = ["measure", "reset", "barrier", "snapshot", "delay", "store"]
+            basic_instrs = [
+                "measure",
+                "reset",
+                "barrier",
+                "snapshot",
+                "delay",
+                "store",
+            ]
             target_basis = set(self._target_basis)
             source_basis = set(self._extract_basis(dag))
             qargs_local_source_basis = {}
         else:
             basic_instrs = ["barrier", "snapshot", "store"]
-            target_basis = self._target.keys() - set(self._non_global_operations)
-            source_basis, qargs_local_source_basis = self._extract_basis_target(dag, qarg_indices)
+            target_basis = self._target.keys() - set(
+                self._non_global_operations
+            )
+            source_basis, qargs_local_source_basis = (
+                self._extract_basis_target(dag, qarg_indices)
+            )
 
         target_basis = set(target_basis).union(basic_instrs)
         # If the source basis is a subset of the target basis and we have no circuit
         # instructions on qargs that have non-global operations there is nothing to
         # translate and we can exit early.
-        if source_basis.issubset(target_basis) and not qargs_local_source_basis:
+        if (
+            source_basis.issubset(target_basis)
+            and not qargs_local_source_basis
+        ):
             return dag
 
         logger.info(
@@ -173,7 +191,9 @@ class BasisTranslator(TransformationPass):
 
         # Search for a path from source to target basis.
         search_start_time = time.time()
-        basis_transforms = _basis_search(self._equiv_lib, source_basis, target_basis)
+        basis_transforms = _basis_search(
+            self._equiv_lib, source_basis, target_basis
+        )
 
         qarg_local_basis_transforms = {}
         for qarg, local_source_basis in qargs_local_source_basis.items():
@@ -183,11 +203,16 @@ class BasisTranslator(TransformationPass):
             # search. This matches with the check we did above to include those
             # subset non-local operations in the check here.
             if len(qarg) > 1:
-                for non_local_qarg, local_basis in self._qargs_with_non_global_operation.items():
+                for (
+                    non_local_qarg,
+                    local_basis,
+                ) in self._qargs_with_non_global_operation.items():
                     if qarg.issuperset(non_local_qarg):
                         expanded_target |= local_basis
             else:
-                expanded_target |= self._qargs_with_non_global_operation[tuple(qarg)]
+                expanded_target |= self._qargs_with_non_global_operation[
+                    tuple(qarg)
+                ]
 
             logger.info(
                 "Performing BasisTranslator search from source basis %s to target "
@@ -216,7 +241,8 @@ class BasisTranslator(TransformationPass):
 
         search_end_time = time.time()
         logger.info(
-            "Basis translation path search completed in %.3fs.", search_end_time - search_start_time
+            "Basis translation path search completed in %.3fs.",
+            search_end_time - search_start_time,
         )
 
         if basis_transforms is None:
@@ -235,13 +261,16 @@ class BasisTranslator(TransformationPass):
         compose_start_time = time.time()
         instr_map = _compose_transforms(basis_transforms, source_basis, dag)
         extra_instr_map = {
-            qarg: _compose_transforms(transforms, qargs_local_source_basis[qarg], dag)
+            qarg: _compose_transforms(
+                transforms, qargs_local_source_basis[qarg], dag
+            )
             for qarg, transforms in qarg_local_basis_transforms.items()
         }
 
         compose_end_time = time.time()
         logger.info(
-            "Basis translation paths composed in %.3fs.", compose_end_time - compose_start_time
+            "Basis translation paths composed in %.3fs.",
+            compose_end_time - compose_start_time,
         )
 
         # Replace source instructions with target translations.
@@ -253,7 +282,10 @@ class BasisTranslator(TransformationPass):
             for node in dag.op_nodes():
                 node_qargs = tuple(wire_map[bit] for bit in node.qargs)
                 qubit_set = frozenset(node_qargs)
-                if node.name in target_basis or len(node.qargs) < self._min_qubits:
+                if (
+                    node.name in target_basis
+                    or len(node.qargs) < self._min_qubits
+                ):
                     if isinstance(node.op, ControlFlowOp):
                         flow_blocks = []
                         for block in node.op.blocks:
@@ -262,7 +294,9 @@ class BasisTranslator(TransformationPass):
                                 dag_block,
                                 {
                                     inner: wire_map[outer]
-                                    for inner, outer in zip(block.qubits, node.qargs)
+                                    for inner, outer in zip(
+                                        block.qubits, node.qargs
+                                    )
                                 },
                             )
                             if dag_updated:
@@ -274,7 +308,8 @@ class BasisTranslator(TransformationPass):
                     continue
                 if (
                     node_qargs in self._qargs_with_non_global_operation
-                    and node.name in self._qargs_with_non_global_operation[node_qargs]
+                    and node.name
+                    in self._qargs_with_non_global_operation[node_qargs]
                 ):
                     continue
 
@@ -285,7 +320,9 @@ class BasisTranslator(TransformationPass):
                 elif (node.op.name, node.op.num_qubits) in instr_map:
                     self._replace_node(dag, node, instr_map)
                 else:
-                    raise TranspilerError(f"BasisTranslator did not map {node.name}.")
+                    raise TranspilerError(
+                        f"BasisTranslator did not map {node.name}."
+                    )
                 dag_updated = True
             return dag_updated
 
@@ -311,15 +348,23 @@ class BasisTranslator(TransformationPass):
             parameter_map = dict(zip(target_params, node.op.params))
             bound_target_dag = target_dag.copy_empty_like()
             for inner_node in target_dag.topological_op_nodes():
-                if any(isinstance(x, ParameterExpression) for x in inner_node.op.params):
+                if any(
+                    isinstance(x, ParameterExpression)
+                    for x in inner_node.op.params
+                ):
                     new_op = inner_node.op.copy()
                     new_params = []
                     for param in new_op.params:
                         if not isinstance(param, ParameterExpression):
                             new_params.append(param)
                         else:
-                            bind_dict = {x: parameter_map[x] for x in param.parameters}
-                            if any(isinstance(x, ParameterExpression) for x in bind_dict.values()):
+                            bind_dict = {
+                                x: parameter_map[x] for x in param.parameters
+                            }
+                            if any(
+                                isinstance(x, ParameterExpression)
+                                for x in bind_dict.values()
+                            ):
                                 new_value = param
                                 for x in bind_dict.items():
                                     new_value = new_value.assign(*x)
@@ -331,11 +376,16 @@ class BasisTranslator(TransformationPass):
                     new_op.params = new_params
                 else:
                     new_op = inner_node.op
-                bound_target_dag.apply_operation_back(new_op, inner_node.qargs, inner_node.cargs)
+                bound_target_dag.apply_operation_back(
+                    new_op, inner_node.qargs, inner_node.cargs
+                )
             if isinstance(target_dag.global_phase, ParameterExpression):
                 old_phase = target_dag.global_phase
                 bind_dict = {x: parameter_map[x] for x in old_phase.parameters}
-                if any(isinstance(x, ParameterExpression) for x in bind_dict.values()):
+                if any(
+                    isinstance(x, ParameterExpression)
+                    for x in bind_dict.values()
+                ):
                     new_phase = old_phase
                     for x in bind_dict.items():
                         new_phase = new_phase.assign(*x)
@@ -345,7 +395,9 @@ class BasisTranslator(TransformationPass):
                 if not new_phase.parameters:
                     new_phase = new_phase.numeric()
                     if isinstance(new_phase, complex):
-                        raise TranspilerError(f"Global phase must be real, but got '{new_phase}'")
+                        raise TranspilerError(
+                            f"Global phase must be real, but got '{new_phase}'"
+                        )
                 bound_target_dag.global_phase = new_phase
         else:
             bound_target_dag = target_dag
@@ -372,7 +424,10 @@ class BasisTranslator(TransformationPass):
     @_extract_basis.register
     def _(self, dag: DAGCircuit):
         for node in dag.op_nodes():
-            if not dag.has_calibration_for(node) and len(node.qargs) >= self._min_qubits:
+            if (
+                not dag.has_calibration_for(node)
+                and len(node.qargs) >= self._min_qubits
+            ):
                 yield (node.name, node.op.num_qubits)
             if isinstance(node.op, ControlFlowOp):
                 for block in node.op.blocks:
@@ -392,7 +447,11 @@ class BasisTranslator(TransformationPass):
                     yield from self._extract_basis(block)
 
     def _extract_basis_target(
-        self, dag, qarg_indices, source_basis=None, qargs_local_source_basis=None
+        self,
+        dag,
+        qarg_indices,
+        source_basis=None,
+        qargs_local_source_basis=None,
     ):
         if source_basis is None:
             source_basis = set()
@@ -400,7 +459,10 @@ class BasisTranslator(TransformationPass):
             qargs_local_source_basis = defaultdict(set)
         for node in dag.op_nodes():
             qargs = tuple(qarg_indices[bit] for bit in node.qargs)
-            if dag.has_calibration_for(node) or len(node.qargs) < self._min_qubits:
+            if (
+                dag.has_calibration_for(node)
+                or len(node.qargs) < self._min_qubits
+            ):
                 continue
             # Treat the instruction as on an incomplete basis if the qargs are in the
             # qargs_with_non_global_operation dictionary or if any of the qubits in qargs
@@ -415,20 +477,26 @@ class BasisTranslator(TransformationPass):
                 frozenset(qargs).issuperset(incomplete_qargs)
                 for incomplete_qargs in self._qargs_with_non_global_operation
             ):
-                qargs_local_source_basis[frozenset(qargs)].add((node.name, node.op.num_qubits))
+                qargs_local_source_basis[frozenset(qargs)].add(
+                    (node.name, node.op.num_qubits)
+                )
             else:
                 source_basis.add((node.name, node.op.num_qubits))
             if isinstance(node.op, ControlFlowOp):
                 for block in node.op.blocks:
                     block_dag = circuit_to_dag(block)
-                    source_basis, qargs_local_source_basis = self._extract_basis_target(
-                        block_dag,
-                        {
-                            inner: qarg_indices[outer]
-                            for inner, outer in zip(block.qubits, node.qargs)
-                        },
-                        source_basis=source_basis,
-                        qargs_local_source_basis=qargs_local_source_basis,
+                    source_basis, qargs_local_source_basis = (
+                        self._extract_basis_target(
+                            block_dag,
+                            {
+                                inner: qarg_indices[outer]
+                                for inner, outer in zip(
+                                    block.qubits, node.qargs
+                                )
+                            },
+                            source_basis=source_basis,
+                            qargs_local_source_basis=qargs_local_source_basis,
+                        )
                     )
         return source_basis, qargs_local_source_basis
 
@@ -468,7 +536,9 @@ class BasisSearchVisitor(rustworkx.visit.DijkstraVisitor):
                 rule.circuit,
                 score,
             )
-            self._basis_transforms.append((gate.name, gate.num_qubits, rule.params, rule.circuit))
+            self._basis_transforms.append(
+                (gate.name, gate.num_qubits, rule.params, rule.circuit)
+            )
         # we can stop the search if we have found all gates in the original ciruit.
         if not self._source_gates_remain:
             # if we start from source gates and apply `basis_transforms` in reverse order, we'll end
@@ -488,7 +558,10 @@ class BasisSearchVisitor(rustworkx.visit.DijkstraVisitor):
         target = self.graph[target].key
         # if there are gates in this `rule` that we have not yet generated, we can't apply
         # this `rule`. if `target` is already in basis, it's not beneficial to use this rule.
-        if self._num_gates_remain_for_rule[edata.index] > 0 or target in self.target_basis:
+        if (
+            self._num_gates_remain_for_rule[edata.index] > 0
+            or target in self.target_basis
+        ):
             raise rustworkx.visit.PruneSearch
 
     def edge_relaxed(self, edge):
@@ -513,7 +586,10 @@ class BasisSearchVisitor(rustworkx.visit.DijkstraVisitor):
 
         cost_tot = 0
         for instruction in edge_data.rule.circuit:
-            key = Key(name=instruction.operation.name, num_qubits=len(instruction.qubits))
+            key = Key(
+                name=instruction.operation.name,
+                num_qubits=len(instruction.qubits),
+            )
             cost_tot += self._opt_cost_map[key]
 
         return cost_tot - self._opt_cost_map[edge_data.source]
@@ -539,7 +615,9 @@ def _basis_search(equiv_lib, source_basis, target_basis):
             was found.
     """
 
-    logger.debug("Begining basis search from %s to %s.", source_basis, target_basis)
+    logger.debug(
+        "Begining basis search from %s to %s.", source_basis, target_basis
+    )
 
     source_basis = {
         (gate_name, gate_num_qubits)
@@ -553,14 +631,18 @@ def _basis_search(equiv_lib, source_basis, target_basis):
 
     # This is only neccessary since gates in target basis are currently reported by
     # their names and we need to have in addition the number of qubits they act on.
-    target_basis_keys = [key for key in equiv_lib.keys() if key.name in target_basis]
+    target_basis_keys = [
+        key for key in equiv_lib.keys() if key.name in target_basis
+    ]
 
     graph = equiv_lib.graph
     vis = BasisSearchVisitor(graph, source_basis, target_basis_keys)
 
     # we add a dummy node and connect it with gates in the target basis.
     # we'll start the search from this dummy node.
-    dummy = graph.add_node(NodeData(key="key", equivs=[("dummy starting node", 0)]))
+    dummy = graph.add_node(
+        NodeData(key="key", equivs=[("dummy starting node", 0)])
+    )
 
     try:
         graph.add_edges_from_no_data(
@@ -568,13 +650,21 @@ def _basis_search(equiv_lib, source_basis, target_basis):
         )
         rtn = None
         try:
-            rustworkx.digraph_dijkstra_search(graph, [dummy], vis.edge_cost, vis)
+            rustworkx.digraph_dijkstra_search(
+                graph, [dummy], vis.edge_cost, vis
+            )
         except StopIfBasisRewritable:
             rtn = vis.basis_transforms
 
             logger.debug("Transformation path:")
             for gate_name, gate_num_qubits, params, equiv in rtn:
-                logger.debug("%s/%s => %s\n%s", gate_name, gate_num_qubits, params, equiv)
+                logger.debug(
+                    "%s/%s => %s\n%s",
+                    gate_name,
+                    gate_num_qubits,
+                    params,
+                    equiv,
+                )
     finally:
         # Remove dummy node in order to return graph to original state
         graph.remove_node(dummy)
@@ -609,7 +699,9 @@ def _compose_transforms(basis_transforms, source_basis, source_dag):
         num_params = len(example_gate.params)
 
         placeholder_params = ParameterVector(gate_name, num_params)
-        placeholder_gate = Gate(gate_name, gate_num_qubits, list(placeholder_params))
+        placeholder_gate = Gate(
+            gate_name, gate_num_qubits, list(placeholder_params)
+        )
         placeholder_gate.params = list(placeholder_params)
 
         dag = DAGCircuit()
@@ -631,11 +723,11 @@ def _compose_transforms(basis_transforms, source_basis, source_dag):
             doomed_nodes = [
                 node
                 for node in dag.op_nodes()
-                if (node.op.name, node.op.num_qubits) == (gate_name, gate_num_qubits)
+                if (node.op.name, node.op.num_qubits)
+                == (gate_name, gate_num_qubits)
             ]
 
             if doomed_nodes and logger.isEnabledFor(logging.DEBUG):
-
                 logger.debug(
                     "Updating transform for mapped instr %s %s from \n%s",
                     mapped_instr_name,
@@ -644,7 +736,6 @@ def _compose_transforms(basis_transforms, source_basis, source_dag):
                 )
 
             for node in doomed_nodes:
-
                 replacement = equiv.assign_parameters(
                     dict(zip_longest(equiv_params, node.op.params))
                 )
@@ -654,7 +745,6 @@ def _compose_transforms(basis_transforms, source_basis, source_dag):
                 dag.substitute_node_with_dag(node, replacement_dag)
 
             if doomed_nodes and logger.isEnabledFor(logging.DEBUG):
-
                 logger.debug(
                     "Updated transform for mapped instr %s %s to\n%s",
                     mapped_instr_name,
@@ -672,7 +762,9 @@ def _get_example_gates(source_dag):
             example_gates[(node.op.name, node.op.num_qubits)] = node.op
             if isinstance(node.op, ControlFlowOp):
                 for block in node.op.blocks:
-                    example_gates = recurse(circuit_to_dag(block), example_gates)
+                    example_gates = recurse(
+                        circuit_to_dag(block), example_gates
+                    )
         return example_gates
 
     return recurse(source_dag)

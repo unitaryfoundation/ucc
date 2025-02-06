@@ -11,6 +11,7 @@
 # that they have been altered from the originals.
 
 """Set the ``layout`` property to the given layout."""
+
 from qiskit.transpiler.basepasses import AnalysisPass
 from qiskit.transpiler.exceptions import InvalidLayoutError
 from qiskit.transpiler.layout import Layout
@@ -56,7 +57,9 @@ class SetLayout(AnalysisPass):
                 raise InvalidLayoutError(
                     f"The provided layout {self.layout} contains duplicate qubits"
                 )
-            layout = Layout({phys: dag.qubits[i] for i, phys in enumerate(self.layout)})
+            layout = Layout(
+                {phys: dag.qubits[i] for i, phys in enumerate(self.layout)}
+            )
         elif isinstance(self.layout, Layout):
             layout = self.layout.copy()
         elif self.layout is None:

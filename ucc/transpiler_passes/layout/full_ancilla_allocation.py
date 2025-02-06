@@ -1,4 +1,3 @@
-
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2023.
@@ -70,25 +69,35 @@ class FullAncillaAllocation(AnalysisPass):
         layout = self.property_set.get("layout")
 
         if layout is None:
-            raise TranspilerError('FullAncillaAllocation pass requires property_set["layout"].')
+            raise TranspilerError(
+                'FullAncillaAllocation pass requires property_set["layout"].'
+            )
 
         virtual_bits = layout.get_virtual_bits()
         physical_bits = layout.get_physical_bits()
         if layout:
-            FullAncillaAllocation.validate_layout(virtual_bits, set(dag.qubits))
+            FullAncillaAllocation.validate_layout(
+                virtual_bits, set(dag.qubits)
+            )
             layout_physical_qubits = list(range(max(physical_bits) + 1))
         else:
             layout_physical_qubits = []
 
-        idle_physical_qubits = [q for q in layout_physical_qubits if q not in physical_bits]
+        idle_physical_qubits = [
+            q for q in layout_physical_qubits if q not in physical_bits
+        ]
 
         if self.target is not None and self.target.num_qubits is not None:
             idle_physical_qubits = [
-                q for q in range(self.target.num_qubits) if q not in physical_bits
+                q
+                for q in range(self.target.num_qubits)
+                if q not in physical_bits
             ]
         elif self.coupling_map:
             idle_physical_qubits = [
-                q for q in self.coupling_map.physical_qubits if q not in physical_bits
+                q
+                for q in self.coupling_map.physical_qubits
+                if q not in physical_bits
             ]
 
         if idle_physical_qubits:
@@ -98,7 +107,9 @@ class FullAncillaAllocation(AnalysisPass):
                 qreg = QuantumRegister(len(idle_physical_qubits))
                 QuantumRegister.prefix = save_prefix
             else:
-                qreg = QuantumRegister(len(idle_physical_qubits), name=self.ancilla_name)
+                qreg = QuantumRegister(
+                    len(idle_physical_qubits), name=self.ancilla_name
+                )
 
             for idx, idle_q in enumerate(idle_physical_qubits):
                 self.property_set["layout"][idle_q] = qreg[idx]

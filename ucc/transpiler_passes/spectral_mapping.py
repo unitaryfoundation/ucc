@@ -24,15 +24,17 @@ class SpectralMapping(AnalysisPass):
     def run(self, dag):
         """Run the SpectralMapping pass on `dag`.
 
-        Args: 
+        Args:
             dag (DAGCircuit): input dag
         """
 
         self.dag = dag
-        num_qubits = self.dag.num_qubits()       
-        
+        num_qubits = self.dag.num_qubits()
+
         # Extract a connected subgraph of the target adjacency matrix
-        best_subgraph = greedy_connected_subgraph(self.coupling_list, num_qubits)
+        best_subgraph = greedy_connected_subgraph(
+            self.coupling_list, num_qubits
+        )
         best_subgraph_qubits = list(best_subgraph.nodes)
         best_subgraph_adj = nx.to_numpy_array(best_subgraph)
 
@@ -42,7 +44,10 @@ class SpectralMapping(AnalysisPass):
         qubit_order = spectral_graph_matching(circuit_adj, best_subgraph_adj)
 
         # Reorder the qubits in the input circuit based on the matching using best_subgraph_qubits
-        virtual_to_physical_match = {qubit:best_subgraph_qubits[qubit_order[i]] for i, qubit in enumerate(self.dag.qubits)}
+        virtual_to_physical_match = {
+            qubit: best_subgraph_qubits[qubit_order[i]]
+            for i, qubit in enumerate(self.dag.qubits)
+        }
 
         # Create a layout object
         layout = Layout(virtual_to_physical_match)
@@ -52,12 +57,13 @@ class SpectralMapping(AnalysisPass):
         self.property_set["sabre_starting_layouts"] = [layout]
 
         return dag
-    
-    def _adjacency_matrix_from_dag(self):
 
+    def _adjacency_matrix_from_dag(self):
         # Step 1: Initialize an empty adjacency matrix
         num_qubits = self.dag.num_qubits()
-        qubit_indices = {qubit: index for index, qubit in enumerate(self.dag.qubits)}
+        qubit_indices = {
+            qubit: index for index, qubit in enumerate(self.dag.qubits)
+        }
         adj_matrix = np.zeros((num_qubits, num_qubits), dtype=int)
 
         # Step through dag
@@ -72,7 +78,6 @@ class SpectralMapping(AnalysisPass):
 
 
 def spectral_graph_matching(A, B):
-
     """
     Perform spectral graph matching between two graphs of equal sizes.
     Parameters:
@@ -81,30 +86,27 @@ def spectral_graph_matching(A, B):
     Returns:
     np.array: Index mapping from graph 1 to graph 2
     """
-    #Ensure that the adjacency matrices are of the same size
+    # Ensure that the adjacency matrices are of the same size
     n1, n2 = A.shape[0], B.shape[0]
     if n1 != n2:
         raise ValueError("The adjacency matrices must be of the same size.")
 
     # Compute eigenvalues and eigenvectors of adjacency matrices
-    A_eigenvals, A_eigenvecs = eigh(A)  
+    A_eigenvals, A_eigenvecs = eigh(A)
     B_eigenvals, B_eigenvecs = eigh(B)
-
 
     # Compute the similarity matrix
     P = np.zeros((n1, n1))
-    eta = 0.1/np.log(n1)
+    eta = 0.1 / np.log(n1)
     for i in range(n1):
         for j in range(n1):
-            weight = eta / (eta**2 + (A_eigenvals[i] - B_eigenvals[j])**2)
+            weight = eta / (eta**2 + (A_eigenvals[i] - B_eigenvals[j]) ** 2)
             P += weight * np.outer(A_eigenvecs[:, i], B_eigenvecs[:, j])
 
     # Solve the linear assignment problem
     row_ind, col_ind = linear_sum_assignment(-P)
 
-    return col_ind   
-
-
+    return col_ind
 
 
 def adjacency_matrix_from_list(adj_list, num_nodes=None):
@@ -132,21 +134,23 @@ def adjacency_matrix_from_list(adj_list, num_nodes=None):
         adj_matrix[node1, node2] = 1
         adj_matrix[node2, node1] = 1  # Assuming an undirected graph
 
-    return adj_matrix   
+    return adj_matrix
 
 
 def greedy_connected_subgraph(coupling_list, subgraph_size):
     """
     Construct a connected subgraph of a graph based on a greedy algorithm.
     """
-    
+
     G = nx.from_edgelist(coupling_list)
 
     if subgraph_size > len(G):
-        raise ValueError("The subgraph size cannot exceed the number of nodes in the graph.")
-    
+        raise ValueError(
+            "The subgraph size cannot exceed the number of nodes in the graph."
+        )
+
     # Start with the highest connected node
-    best_subgraph = set([max(dict(G.degree).items(), key=lambda x: x[1])[0]])   
+    best_subgraph = set([max(dict(G.degree).items(), key=lambda x: x[1])[0]])
     while len(best_subgraph) < subgraph_size:
         best_node = None
         best_edges = 0
@@ -154,18 +158,18 @@ def greedy_connected_subgraph(coupling_list, subgraph_size):
         # Convert nodes to a list and shuffle
         nodes = list(G.nodes - best_subgraph)
         random.shuffle(nodes)
-        
+
         for node in nodes:
             temp_subgraph = best_subgraph | {node}
             subgraph_edges = G.subgraph(temp_subgraph).number_of_edges()
-            
+
             if subgraph_edges > best_edges:
                 best_edges = subgraph_edges
                 best_node = node
-        
+
         if best_node is None:  # No node improved connectivity
             break
-        
+
         best_subgraph.add(best_node)
-    
+
     return G.subgraph(best_subgraph)

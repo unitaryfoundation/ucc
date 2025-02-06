@@ -1,4 +1,4 @@
-# This file has been modified from the original version in Qiskit. 
+# This file has been modified from the original version in Qiskit.
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2024.
@@ -24,11 +24,12 @@ def prepare_superposition(qubits):
         circuit.append(cirq.H(qubit))
     return circuit
 
+
 def select_oracle(qubits, target_state):
     circuit = cirq.Circuit()
     # Apply X gates to the qubits corresponding to 0 in the target state
     for i, bit in enumerate(target_state):
-        if bit == '0':
+        if bit == "0":
             circuit.append(cirq.X(qubits[i]))
 
     # Apply a multi-controlled Z gate
@@ -36,10 +37,11 @@ def select_oracle(qubits, target_state):
 
     # Apply X gates again to revert the qubits back to their original state
     for i, bit in enumerate(target_state):
-        if bit == '0':
+        if bit == "0":
             circuit.append(cirq.X(qubits[i]))
-    
+
     return circuit
+
 
 def cirq_prep_select(num_qubits, target_state):
     # Setup the circuit and its qubits.
@@ -49,16 +51,18 @@ def cirq_prep_select(num_qubits, target_state):
     select_circuit = select_oracle(qubits, target_state)
     return prepare_circuit + select_circuit
 
+
 def cirq_QFT(num_qubits):
     qubits = cirq.LineQubit.range(num_qubits)
     circuit = cirq.Circuit()
     for i in range(num_qubits):
         for j in range(i):
-            circuit.append(cirq.CZ(qubits[j], qubits[i]) ** (1/2**(i-j)))
+            circuit.append(cirq.CZ(qubits[j], qubits[i]) ** (1 / 2 ** (i - j)))
         circuit.append(cirq.H(qubits[i]))
     for i in range(num_qubits // 2):
-        circuit.append(cirq.SWAP(qubits[i], qubits[num_qubits-i-1]))
+        circuit.append(cirq.SWAP(qubits[i], qubits[num_qubits - i - 1]))
     return circuit
+
 
 def cirq_QV(num_qubits, depth, seed=None):
     """Generates a model circuit with the given number of qubits and depth.
@@ -89,7 +93,9 @@ def cirq_QV(num_qubits, depth, seed=None):
         # Decompose each SU(4) into CNOT + SU(2) and add to Ci
         for k in range(0, num_qubits - 1, 2):
             permuted_indices = [int(perm[k]), int(perm[k + 1])]
-            special_unitary = cirq.testing.random_special_unitary(4, random_state=seed)
+            special_unitary = cirq.testing.random_special_unitary(
+                4, random_state=seed
+            )
 
             # Convert the decomposed unitary to Cirq operations and add them to
             # the circuit.

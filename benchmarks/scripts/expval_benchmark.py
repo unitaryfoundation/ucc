@@ -15,6 +15,7 @@ from ucc import compile as ucc_compile
 with open("../circuits/qasm2/ucc/prep_select_N10_ghz.qasm") as f:
     qasm_string = f.read()
 
+
 def generate_compiled_circuits(qasm: str) -> dict[str, qiskit.QuantumCircuit]:
     """Compiles the circuit represented in a QASM string using different
     compilers before converting them all to Qiskit circuits.
@@ -60,7 +61,9 @@ def simulate_density_matrix(circuit: qiskit.QuantumCircuit) -> np.ndarray:
     depolarizing_noise.add_all_qubit_quantum_error(error, ["u1", "u2", "u3"])
     depolarizing_noise.add_all_qubit_quantum_error(two_qubit_error, ["cx"])
 
-    simulator = AerSimulator(method="density_matrix", noise_model=depolarizing_noise)
+    simulator = AerSimulator(
+        method="density_matrix", noise_model=depolarizing_noise
+    )
     return simulator.run(circuit).result().data()["density_matrix"]
 
 
@@ -82,12 +85,13 @@ ideal_circuit = qasm2.loads(qasm_string)
 ideal_state = Statevector.from_instruction(ideal_circuit)
 ideal_expval = np.real(ideal_state.expectation_value(observable))
 
-results = [{
-    "compiler":compiler,
-    "expval": expval,
-    "absoluate_error": abs(ideal_expval - expval),
-    "relative_error": abs(ideal_expval - expval) / abs(ideal_expval),
-    "ideal": ideal_expval,
+results = [
+    {
+        "compiler": compiler,
+        "expval": expval,
+        "absoluate_error": abs(ideal_expval - expval),
+        "relative_error": abs(ideal_expval - expval) / abs(ideal_expval),
+        "ideal": ideal_expval,
     }
     for compiler, expval in expectation_values.items()
 ]

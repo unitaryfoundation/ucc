@@ -1,4 +1,3 @@
-
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2019.
@@ -40,9 +39,15 @@ class EnlargeWithAncilla(TransformationPass):
         layout = self.property_set["layout"]
 
         if layout is None:
-            raise TranspilerError('EnlargeWithAncilla requires property_set["layout"]')
+            raise TranspilerError(
+                'EnlargeWithAncilla requires property_set["layout"]'
+            )
 
-        new_qregs = {reg for reg in layout.get_registers() if reg not in dag.qregs.values()}
+        new_qregs = {
+            reg
+            for reg in layout.get_registers()
+            if reg not in dag.qregs.values()
+        }
 
         for qreg in new_qregs:
             dag.add_qreg(qreg)

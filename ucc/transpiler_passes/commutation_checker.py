@@ -1,5 +1,5 @@
-# This file has been modified from the original version in Qiskit. 
-# 
+# This file has been modified from the original version in Qiskit.
+#
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2021.
@@ -53,7 +53,9 @@ _supported_ops = {
 def _identity_op(num_qubits):
     """Cached identity matrix"""
     return Operator(
-        np.eye(2**num_qubits), input_dims=(2,) * num_qubits, output_dims=(2,) * num_qubits
+        np.eye(2**num_qubits),
+        input_dims=(2,) * num_qubits,
+        output_dims=(2,) * num_qubits,
     )
 
 
@@ -108,7 +110,9 @@ class CommutationChecker:
         cargs2 = op2.cargs
         if not op2.is_standard_gate():
             op2 = op2.op
-        return self.commute(op1, qargs1, cargs1, op2, qargs2, cargs2, max_num_qubits)
+        return self.commute(
+            op1, qargs1, cargs1, op2, qargs2, cargs2, max_num_qubits
+        )
 
     def commute(
         self,
@@ -141,7 +145,10 @@ class CommutationChecker:
         """
         # Skip gates that are not specified.
         if self._gate_names is not None:
-            if op1.name not in self._gate_names or op2.name not in self._gate_names:
+            if (
+                op1.name not in self._gate_names
+                or op2.name not in self._gate_names
+            ):
                 return False
 
         structural_commutation = _commutation_precheck(
@@ -157,10 +164,15 @@ class CommutationChecker:
         first_op, first_qargs, _ = first_op_tuple
         second_op, second_qargs, _ = second_op_tuple
 
-        skip_cache = first_op.name in _no_cache_op_names or second_op.name in _no_cache_op_names
+        skip_cache = (
+            first_op.name in _no_cache_op_names
+            or second_op.name in _no_cache_op_names
+        )
 
         if skip_cache:
-            return _commute_matmul(first_op, first_qargs, second_op, second_qargs)
+            return _commute_matmul(
+                first_op, first_qargs, second_op, second_qargs
+            )
 
         commutation_lookup = self.check_commutation_entries(
             first_op, first_qargs, second_op, second_qargs
@@ -168,12 +180,14 @@ class CommutationChecker:
 
         if commutation_lookup is not None:
             return commutation_lookup
-        
+
         if not self._check_matrix:
             return False
 
         # Compute commutation via matrix multiplication
-        is_commuting = _commute_matmul(first_op, first_qargs, second_op, second_qargs)
+        is_commuting = _commute_matmul(
+            first_op, first_qargs, second_op, second_qargs
+        )
 
         # Store result in this session's commutation_library
         # TODO implement LRU cache or similar
@@ -184,13 +198,20 @@ class CommutationChecker:
         first_params = getattr(first_op, "params", [])
         second_params = getattr(second_op, "params", [])
         if len(first_params) > 0 or len(second_params) > 0:
-            self._cached_commutations.setdefault((first_op.name, second_op.name), {}).setdefault(
+            self._cached_commutations.setdefault(
+                (first_op.name, second_op.name), {}
+            ).setdefault(
                 _get_relative_placement(first_qargs, second_qargs), {}
             )[
-                (_hashable_parameters(first_params), _hashable_parameters(second_params))
+                (
+                    _hashable_parameters(first_params),
+                    _hashable_parameters(second_params),
+                )
             ] = is_commuting
         else:
-            self._cached_commutations.setdefault((first_op.name, second_op.name), {})[
+            self._cached_commutations.setdefault(
+                (first_op.name, second_op.name), {}
+            )[
                 _get_relative_placement(first_qargs, second_qargs)
             ] = is_commuting
         self._current_cache_entries += 1
@@ -325,15 +346,17 @@ def _commutation_precheck(
     if set(qargs1).isdisjoint(qargs2) and set(cargs1).isdisjoint(cargs2):
         return True
 
-    if not is_commutation_supported(op1, qargs1, max_num_qubits) or not is_commutation_supported(
-        op2, qargs2, max_num_qubits
-    ):
+    if not is_commutation_supported(
+        op1, qargs1, max_num_qubits
+    ) or not is_commutation_supported(op2, qargs2, max_num_qubits):
         return False
 
     return None
 
 
-def _get_relative_placement(first_qargs: List[Qubit], second_qargs: List[Qubit]) -> tuple:
+def _get_relative_placement(
+    first_qargs: List[Qubit], second_qargs: List[Qubit]
+) -> tuple:
     """Determines the relative qubit placement of two gates. Note: this is NOT symmetric.
 
     Args:
@@ -360,11 +383,18 @@ def _persistent_id(op_name: str) -> int:
     Return:
         The integer id of the input string.
     """
-    return int.from_bytes(bytes(op_name, encoding="utf-8"), byteorder="big", signed=True)
+    return int.from_bytes(
+        bytes(op_name, encoding="utf-8"), byteorder="big", signed=True
+    )
 
 
 def _order_operations(
-    op1: Operation, qargs1: List, cargs1: List, op2: Operation, qargs2: List, cargs2: List
+    op1: Operation,
+    qargs1: List,
+    cargs1: List,
+    op2: Operation,
+    qargs2: List,
+    cargs2: List,
 ):
     """Orders two operations in a canonical way that is persistent over
     @different python versions and executions
@@ -381,7 +411,9 @@ def _order_operations(
     op1_tuple = (op1, qargs1, cargs1)
     op2_tuple = (op2, qargs2, cargs2)
     least_qubits_op, most_qubits_op = (
-        (op1_tuple, op2_tuple) if op1.num_qubits < op2.num_qubits else (op2_tuple, op1_tuple)
+        (op1_tuple, op2_tuple)
+        if op1.num_qubits < op2.num_qubits
+        else (op2_tuple, op1_tuple)
     )
     # prefer operation with the least number of qubits as first key as this results in shorter keys
     if op1.num_qubits != op2.num_qubits:
@@ -447,7 +479,10 @@ def _query_commutation(
 
 
 def _commute_matmul(
-    first_ops: Operation, first_qargs: List, second_op: Operation, second_qargs: List
+    first_ops: Operation,
+    first_qargs: List,
+    second_op: Operation,
+    second_qargs: List,
 ):
     qarg = {q: i for i, q in enumerate(first_qargs)}
     num_qubits = len(qarg)
@@ -472,10 +507,14 @@ def _commute_matmul(
     # return false
     try:
         operator_1 = Operator(
-            first_ops, input_dims=(2,) * len(first_qarg), output_dims=(2,) * len(first_qarg)
+            first_ops,
+            input_dims=(2,) * len(first_qarg),
+            output_dims=(2,) * len(first_qarg),
         )
         operator_2 = Operator(
-            second_op, input_dims=(2,) * len(second_qarg), output_dims=(2,) * len(second_qarg)
+            second_op,
+            input_dims=(2,) * len(second_qarg),
+            output_dims=(2,) * len(second_qarg),
         )
     except QiskitError:
         return False

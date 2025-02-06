@@ -25,11 +25,15 @@ import sys  # Add sys to accept command line arguments
 from ucc import compile as ucc_compile
 
 
-def log_performance(compiler_function, raw_circuit, compiler_alias, circuit_name):
+def log_performance(
+    compiler_function, raw_circuit, compiler_alias, circuit_name
+):
     log_entry = {"compiler": compiler_alias}
     log_entry["circuit_name"] = circuit_name
-    
-    log_entry["raw_multiq_gates"] = count_multi_qubit_gates(raw_circuit, compiler_alias)
+
+    log_entry["raw_multiq_gates"] = count_multi_qubit_gates(
+        raw_circuit, compiler_alias
+    )
 
     t1 = time()
     compiled_circuit = compiler_function(raw_circuit)
@@ -69,9 +73,9 @@ def get_native_rep(qasm_string, compiler_alias):
         qasm_string: QASM string representing the circuit.
         compiler_alias: Alias of the compiler to be used for conversion.
     """
-    if compiler_alias == 'ucc':
+    if compiler_alias == "ucc":
         # Qiskit used for UCC to get raw gate counts
-        native_circuit = translate(qasm_string, 'qiskit')
+        native_circuit = translate(qasm_string, "qiskit")
     else:
         native_circuit = translate(qasm_string, compiler_alias)
 
@@ -96,7 +100,9 @@ def pytket_compile(pytket_circuit):
 # Qiskit compilation
 def qiskit_compile(qiskit_circuit):
     return qiskit_transpile(
-        qiskit_circuit, optimization_level=3, basis_gates=["rz", "rx", "ry", "h", "cx"]
+        qiskit_circuit,
+        optimization_level=3,
+        basis_gates=["rz", "rx", "ry", "h", "cx"],
     )
 
 
@@ -112,12 +118,20 @@ def count_multi_qubit_gates_pytket(pytket_circuit):
 
 # Multi-qubit gate count for Qiskit
 def count_multi_qubit_gates_qiskit(qiskit_circuit):
-    return sum(1 for instruction, _, _ in qiskit_circuit.data if instruction.num_qubits > 1)
+    return sum(
+        1
+        for instruction, _, _ in qiskit_circuit.data
+        if instruction.num_qubits > 1
+    )
 
 
 # Multi-qubit gate count for Cirq
 def count_multi_qubit_gates_cirq(cirq_circuit):
-    return sum(1 for operation in cirq_circuit.all_operations() if len(operation.qubits) > 1)
+    return sum(
+        1
+        for operation in cirq_circuit.all_operations()
+        if len(operation.qubits) > 1
+    )
 
 
 def count_multi_qubit_gates(circuit, compiler_alias):
@@ -130,6 +144,7 @@ def count_multi_qubit_gates(circuit, compiler_alias):
             return count_multi_qubit_gates_pytket(circuit)
         case _:
             return "Unknown compiler alias."
+
 
 def get_header(df):
     # Get version information for the compilers
@@ -146,9 +161,13 @@ def get_header(df):
     )
 
     # Get Operating System Info
-    os_info = platform.system()  # OS name (e.g., 'Darwin' for macOS, 'Linux', 'Windows')
+    os_info = (
+        platform.system()
+    )  # OS name (e.g., 'Darwin' for macOS, 'Linux', 'Windows')
     os_version = platform.version()  # OS version
-    architecture = platform.architecture()  # System architecture (e.g., '64bit')
+    architecture = (
+        platform.architecture()
+    )  # System architecture (e.g., '64bit')
 
     # Get Parallelism Info (number of CPU cores)
     cpu_count = os.cpu_count()  # Number of available CPU cores
@@ -158,9 +177,12 @@ def get_header(df):
     version_header += f" # {header_info}"
     return version_header
 
-def save_results(results_log, benchmark_name="gates", folder="../results", append=False):
+
+def save_results(
+    results_log, benchmark_name="gates", folder="../results", append=False
+):
     """Save the results of the benchmarking to a CSV file with compiler versions as a header.
-    
+
     Parameters:
         results_log: Benchmark results. Type can be any accepted by pd.DataFrame.
         benchmark_name: Name of the benchmark to be stored as prefix to the filename. Default is "gates".
@@ -192,13 +214,25 @@ def save_results(results_log, benchmark_name="gates", folder="../results", appen
 # Read the QASM files passed as command-line arguments
 def get_qasm_files():
     if len(sys.argv) < 2:
-        print("No QASM files provided. Please provide them as command-line arguments.")
+        print(
+            "No QASM files provided. Please provide them as command-line arguments."
+        )
         sys.exit(1)
-    
+
     return sys.argv[1:]
 
 
-def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), increment=5, fontsize=8, max_attempts=20):
+def annotate_and_adjust(
+    ax,
+    text,
+    xy,
+    color,
+    previous_bboxes,
+    offset=(0, 15),
+    increment=5,
+    fontsize=8,
+    max_attempts=20,
+):
     """
     Annotates the plot while dynamically adjusting the position to avoid overlaps. In-place operation.
 
@@ -222,7 +256,7 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
         xy,
         textcoords="offset points",
         xytext=offset,  # Default offset
-        ha='center',
+        ha="center",
         fontsize=fontsize,
         color=color,
         rotation=15,
@@ -231,14 +265,14 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
             color=color,
             lw=0.5,
             shrinkA=0,  # Shrink arrow length to avoid overlap
-            shrinkB=5
+            shrinkB=5,
         ),
         bbox=dict(
             boxstyle="round,pad=0.2",
             edgecolor=color,
             facecolor="white",
-            alpha=0.25
-        )
+            alpha=0.25,
+        ),
     )
 
     # Force a renderer update to ensure bounding box accuracy
@@ -246,7 +280,9 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
     renderer = ax.figure.canvas.get_renderer()
 
     # Get the bounding box of the annotation in data coordinates
-    bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
+    bbox = annotation.get_tightbbox(renderer).transformed(
+        ax.transData.inverted()
+    )
     # print(f"Initial annotation: '{text}' at {xy}, bbox: {bbox}", '\n')
 
     attempts = 0
@@ -262,25 +298,30 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
         # Increase vertical offset to move annotation upward
         current_offset += increment
         annotation.set_position((offset[0], current_offset))
-        
+
         # Force the renderer to update after position adjustment
         ax.figure.canvas.draw()
-        bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
+        bbox = annotation.get_tightbbox(renderer).transformed(
+            ax.transData.inverted()
+        )
 
         # Update the plot to show the new position
         ax.figure.canvas.flush_events()
         # Increment the attempt counter and check for max attempts
         attempts += 1
         if attempts >= max_attempts:
-            print(f"Warning: Maximum adjustment attempts reached for annotation '{text}'.")
+            print(
+                f"Warning: Maximum adjustment attempts reached for annotation '{text}'."
+            )
             break
 
     # Add the final bounding box to the list of previous bounding boxes
     previous_bboxes.append(bbox)
 
 
-
-def adjust_axes_to_fit_labels(ax, x_scale=1.0, y_scale=1.0, x_log=False, y_log=False):
+def adjust_axes_to_fit_labels(
+    ax, x_scale=1.0, y_scale=1.0, x_log=False, y_log=False
+):
     """
     Adjust the axes limits to ensure all labels and annotations fit within the view. In-place operation.
 
@@ -299,8 +340,11 @@ def adjust_axes_to_fit_labels(ax, x_scale=1.0, y_scale=1.0, x_log=False, y_log=F
 
     # Check the position of all annotations
     all_bboxes = [
-        child.get_window_extent(renderer=renderer).transformed(ax.transData.inverted())
-        for child in ax.get_children() if isinstance(child, matplotlib.text.Annotation)
+        child.get_window_extent(renderer=renderer).transformed(
+            ax.transData.inverted()
+        )
+        for child in ax.get_children()
+        if isinstance(child, matplotlib.text.Annotation)
     ]
 
     # Expand x-axis limits if annotations are off the edge

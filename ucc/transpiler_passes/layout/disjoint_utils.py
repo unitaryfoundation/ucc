@@ -1,4 +1,3 @@
-
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2023.
@@ -12,6 +11,7 @@
 # that they have been altered from the originals.
 
 """This module contains common utils for disjoint coupling maps."""
+
 from __future__ import annotations
 from collections import defaultdict
 from typing import List, Callable, TypeVar, Dict, Union
@@ -38,7 +38,9 @@ def run_pass_over_connected_components(
 ) -> List[T]:
     """Run a transpiler pass inner function over mapped components."""
     if isinstance(components_source, Target):
-        coupling_map = components_source.build_coupling_map(filter_idle_qubits=True)
+        coupling_map = components_source.build_coupling_map(
+            filter_idle_qubits=True
+        )
     else:
         coupling_map = components_source
     cmap_components = coupling_map.connected_components()
@@ -79,14 +81,20 @@ def map_components(
 ) -> Dict[int, List[int]]:
     """Returns a map where the key is the index of each connected component in cmap_components and
     the value is a list of indices from dag_components which should be placed onto it."""
-    free_qubits = {index: len(cmap.graph) for index, cmap in enumerate(cmap_components)}
+    free_qubits = {
+        index: len(cmap.graph) for index, cmap in enumerate(cmap_components)
+    }
     out_mapping = defaultdict(list)
 
     for dag_index, dag in sorted(
-        enumerate(dag_components), key=lambda x: x[1].num_qubits(), reverse=True
+        enumerate(dag_components),
+        key=lambda x: x[1].num_qubits(),
+        reverse=True,
     ):
         for cmap_index in sorted(
-            range(len(cmap_components)), key=lambda index: free_qubits[index], reverse=True
+            range(len(cmap_components)),
+            key=lambda index: free_qubits[index],
+            reverse=True,
         ):
             # TODO: Improve heuristic to involve connectivity and estimate
             # swap cost
@@ -137,16 +145,22 @@ def combine_barriers(dag: DAGCircuit, retain_uuid: bool = True):
                 other_node = uuid_map[barrier_uuid]
                 num_qubits = len(other_node.qargs) + len(node.qargs)
                 new_op = Barrier(num_qubits, label=barrier_uuid)
-                new_node = dag.replace_block_with_op([node, other_node], new_op, qubit_indices)
+                new_node = dag.replace_block_with_op(
+                    [node, other_node], new_op, qubit_indices
+                )
                 uuid_map[barrier_uuid] = new_node
             else:
                 uuid_map[barrier_uuid] = node
     if not retain_uuid:
         for node in dag.op_nodes(Barrier):
-            if isinstance(node.op.label, str) and node.op.label.startswith("_none_uuid="):
+            if isinstance(node.op.label, str) and node.op.label.startswith(
+                "_none_uuid="
+            ):
                 node.op.label = None
             elif isinstance(node.op.label, str) and "_uuid=" in node.op.label:
-                original_label = "_uuid=".join(node.op.label.split("_uuid=")[:-1])
+                original_label = "_uuid=".join(
+                    node.op.label.split("_uuid=")[:-1]
+                )
                 node.op.label = original_label
 
 
@@ -165,17 +179,24 @@ def require_layout_isolated_to_component(
         TranspilerError: Chosen layout is not valid for the target disjoint connectivity.
     """
     if isinstance(components_source, Target):
-        coupling_map = components_source.build_coupling_map(filter_idle_qubits=True)
+        coupling_map = components_source.build_coupling_map(
+            filter_idle_qubits=True
+        )
     else:
         coupling_map = components_source
-    component_sets = [set(x.graph.nodes()) for x in coupling_map.connected_components()]
+    component_sets = [
+        set(x.graph.nodes()) for x in coupling_map.connected_components()
+    ]
     for inst in dag.two_qubit_ops():
         component_index = None
         for i, component_set in enumerate(component_sets):
             if dag.find_bit(inst.qargs[0]).index in component_set:
                 component_index = i
                 break
-        if dag.find_bit(inst.qargs[1]).index not in component_sets[component_index]:
+        if (
+            dag.find_bit(inst.qargs[1]).index
+            not in component_sets[component_index]
+        ):
             raise TranspilerError(
                 "The circuit has an invalid layout as two qubits need to interact in disconnected "
                 "components of the coupling map. The physical qubit "
@@ -203,11 +224,15 @@ def separate_dag(dag: DAGCircuit) -> List[DAGCircuit]:
         new_dag.global_phase = 0
         for node in dag.topological_op_nodes():
             if dag_qubits.issuperset(node.qargs):
-                new_dag.apply_operation_back(node.op, node.qargs, node.cargs, check=False)
+                new_dag.apply_operation_back(
+                    node.op, node.qargs, node.cargs, check=False
+                )
         idle_clbits = []
         for bit, node in new_dag.input_map.items():
             succ_node = next(new_dag.successors(node))
-            if isinstance(succ_node, DAGOutNode) and isinstance(succ_node.wire, Clbit):
+            if isinstance(succ_node, DAGOutNode) and isinstance(
+                succ_node.wire, Clbit
+            ):
                 idle_clbits.append(bit)
         new_dag.remove_clbits(*idle_clbits)
         combine_barriers(new_dag)

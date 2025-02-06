@@ -1,4 +1,3 @@
-
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2019.
@@ -104,7 +103,9 @@ class ApplyLayout(TransformationPass):
                 full_layout.add_register(reg)
             # Apply new layout to the circuit
             for node in dag.topological_op_nodes():
-                qargs = [q[new_virtual_to_physical[qarg]] for qarg in node.qargs]
+                qargs = [
+                    q[new_virtual_to_physical[qarg]] for qarg in node.qargs
+                ]
                 new_dag._apply_op_node_back(
                     DAGOpNode.from_instruction(
                         node._to_circuit_instruction().replace(qubits=qargs)
@@ -114,7 +115,9 @@ class ApplyLayout(TransformationPass):
             self.property_set["layout"] = full_layout
             if (final_layout := self.property_set["final_layout"]) is not None:
                 final_layout_mapping = {
-                    new_dag.qubits[phys_map[dag.find_bit(old_virt).index]]: phys_map[old_phys]
+                    new_dag.qubits[
+                        phys_map[dag.find_bit(old_virt).index]
+                    ]: phys_map[old_phys]
                     for old_virt, old_phys in final_layout.get_virtual_bits().items()
                 }
                 out_layout = Layout(final_layout_mapping)

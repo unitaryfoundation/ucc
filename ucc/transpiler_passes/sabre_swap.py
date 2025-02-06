@@ -1,4 +1,3 @@
-
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2020.
@@ -32,7 +31,13 @@ from qiskit.transpiler.passes.layout import disjoint_utils
 from qiskit.dagcircuit import DAGCircuit, DAGOpNode
 from qiskit.utils.parallel import CPU_COUNT
 
-from qiskit._accelerate.sabre import sabre_routing, Heuristic, SetScaling, NeighborTable, SabreDAG
+from qiskit._accelerate.sabre import (
+    sabre_routing,
+    Heuristic,
+    SetScaling,
+    NeighborTable,
+    SabreDAG,
+)
 from qiskit._accelerate.nlayout import NLayout
 
 logger = logging.getLogger(__name__)
@@ -75,7 +80,14 @@ class SabreSwap(TransformationPass):
     `arXiv:1809.02573 <https://arxiv.org/pdf/1809.02573.pdf>`_
     """
 
-    def __init__(self, coupling_map, heuristic="basic", seed=None, fake_run=False, trials=None):
+    def __init__(
+        self,
+        coupling_map,
+        heuristic="basic",
+        seed=None,
+        fake_run=False,
+        trials=None,
+    ):
         r"""SabreSwap initializer.
 
         Args:
@@ -148,7 +160,10 @@ class SabreSwap(TransformationPass):
         else:
             self.coupling_map = coupling_map
             self.target = None
-        if self.coupling_map is not None and not self.coupling_map.is_symmetric:
+        if (
+            self.coupling_map is not None
+            and not self.coupling_map.is_symmetric
+        ):
             # A deepcopy is needed here if we don't own the coupling map (i.e. we were given it,
             # rather than calculated it from the Target), to avoid modifications updating shared
             # references in passes which require directional constraints.
@@ -186,7 +201,9 @@ class SabreSwap(TransformationPass):
         """
 
         if self.coupling_map is None:
-            raise TranspilerError("SabreSwap cannot run with coupling_map=None")
+            raise TranspilerError(
+                "SabreSwap cannot run with coupling_map=None"
+            )
 
         if len(dag.qregs) != 1 or dag.qregs.get("q", None) is None:
             raise TranspilerError("Sabre swap runs on physical circuits only.")
@@ -210,9 +227,9 @@ class SabreSwap(TransformationPass):
         if isinstance(self.heuristic, Heuristic):
             heuristic = self.heuristic
         elif self.heuristic == "basic":
-            heuristic = Heuristic(attempt_limit=10 * num_dag_qubits).with_basic(
-                1.0, SetScaling.Size
-            )
+            heuristic = Heuristic(
+                attempt_limit=10 * num_dag_qubits
+            ).with_basic(1.0, SetScaling.Size)
         elif self.heuristic == "lookahead":
             heuristic = (
                 Heuristic(attempt_limit=10 * num_dag_qubits)
@@ -227,7 +244,9 @@ class SabreSwap(TransformationPass):
                 .with_decay(0.001, 5)
             )
         else:
-            raise TranspilerError(f"Heuristic {self.heuristic} not recognized.")
+            raise TranspilerError(
+                f"Heuristic {self.heuristic} not recognized."
+            )
         disjoint_utils.require_layout_isolated_to_component(
             dag, self.coupling_map if self.target is None else self.target
         )
@@ -236,11 +255,16 @@ class SabreSwap(TransformationPass):
 
         canonical_register = dag.qregs["q"]
         current_layout = Layout.generate_trivial_layout(canonical_register)
-        self._qubit_indices = {bit: idx for idx, bit in enumerate(canonical_register)}
-        layout_mapping = {
-            self._qubit_indices[k]: v for k, v in current_layout.get_virtual_bits().items()
+        self._qubit_indices = {
+            bit: idx for idx, bit in enumerate(canonical_register)
         }
-        initial_layout = NLayout(layout_mapping, len(dag.qubits), self.coupling_map.size())
+        layout_mapping = {
+            self._qubit_indices[k]: v
+            for k, v in current_layout.get_virtual_bits().items()
+        }
+        initial_layout = NLayout(
+            layout_mapping, len(dag.qubits), self.coupling_map.size()
+        )
 
         sabre_dag, circuit_to_dag_dict = _build_sabre_dag(
             dag,
@@ -258,7 +282,10 @@ class SabreSwap(TransformationPass):
             self.seed,
         )
         sabre_stop = time.perf_counter()
-        logging.debug("Sabre swap algorithm execution complete in: %s", sabre_stop - sabre_start)
+        logging.debug(
+            "Sabre swap algorithm execution complete in: %s",
+            sabre_stop - sabre_start,
+        )
         final_layout = Layout(dict(zip(dag.qubits, final_permutation)))
         if self.property_set["final_layout"] is None:
             self.property_set["final_layout"] = final_layout
@@ -313,7 +340,10 @@ def _build_sabre_dag(dag, num_physical_qubits, qubit_indices):
                 node_blocks[node._node_id] = [
                     recurse(
                         block,
-                        {inner: wire_map[outer] for inner, outer in zip(block.qubits, node.qargs)},
+                        {
+                            inner: wire_map[outer]
+                            for inner, outer in zip(block.qubits, node.qargs)
+                        },
                     )
                     for block in node.op.blocks
                 ]
@@ -325,7 +355,9 @@ def _build_sabre_dag(dag, num_physical_qubits, qubit_indices):
                     node.is_directive(),
                 )
             )
-        return SabreDAG(num_physical_qubits, block_dag.num_clbits(), dag_list, node_blocks)
+        return SabreDAG(
+            num_physical_qubits, block_dag.num_clbits(), dag_list, node_blocks
+        )
 
     return process_dag(dag, qubit_indices), circuit_to_dag_dict
 
@@ -380,7 +412,9 @@ def _apply_sabre_result(
         for a, b in swaps:
             qubits = (physical_qubits[a], physical_qubits[b])
             layout.swap_physical(a, b)
-            dest_dag.apply_operation_back(swap_singleton, qubits, (), check=False)
+            dest_dag.apply_operation_back(
+                swap_singleton, qubits, (), check=False
+            )
 
     def recurse(dest_dag, source_dag, result, root_logical_map, layout):
         """The main recursive worker.  Mutates ``dest_dag`` and ``layout`` and returns them.
@@ -394,7 +428,9 @@ def _apply_sabre_result(
                 apply_swaps(dest_dag, swap_map[node_id], layout)
             if not node.is_control_flow():
                 qubits = [
-                    physical_qubits[layout.virtual_to_physical(root_logical_map[q])]
+                    physical_qubits[
+                        layout.virtual_to_physical(root_logical_map[q])
+                    ]
                     for q in node.qargs
                 ]
                 dest_dag._apply_op_node_back(
@@ -411,7 +447,8 @@ def _apply_sabre_result(
             idle_qubits = set(dest_dag.qubits)
             for block, block_result in zip(node.op.blocks, block_results):
                 block_root_logical_map = {
-                    inner: root_logical_map[outer] for inner, outer in zip(block.qubits, node.qargs)
+                    inner: root_logical_map[outer]
+                    for inner, outer in zip(block.qubits, node.qargs)
                 }
                 block_dag, block_layout = recurse(
                     empty_dag(block),
@@ -424,7 +461,9 @@ def _apply_sabre_result(
                     block_root_logical_map,
                     layout.copy(),
                 )
-                apply_swaps(block_dag, block_result.swap_epilogue, block_layout)
+                apply_swaps(
+                    block_dag, block_result.swap_epilogue, block_layout
+                )
                 mapped_block_dags.append(block_dag)
                 idle_qubits.intersection_update(block_dag.idle_wires())
 
@@ -436,9 +475,15 @@ def _apply_sabre_result(
 
             # Apply the control flow gate to the dag.
             mapped_node = node.op.replace_blocks(mapped_blocks)
-            mapped_node_qargs = mapped_blocks[0].qubits if mapped_blocks else ()
-            dest_dag.apply_operation_back(mapped_node, mapped_node_qargs, node.cargs, check=False)
+            mapped_node_qargs = (
+                mapped_blocks[0].qubits if mapped_blocks else ()
+            )
+            dest_dag.apply_operation_back(
+                mapped_node, mapped_node_qargs, node.cargs, check=False
+            )
         return dest_dag, layout
 
     root_logical_map = {bit: index for index, bit in enumerate(in_dag.qubits)}
-    return recurse(out_dag, in_dag, sabre_result, root_logical_map, initial_layout)[0]
+    return recurse(
+        out_dag, in_dag, sabre_result, root_logical_map, initial_layout
+    )[0]

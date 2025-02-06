@@ -10,8 +10,7 @@
 # copyright notice, and modified files need to carry a notice indicating
 # that they have been altered from the originals.
 
-"""Layout selection using the SABRE bidirectional search approach from Li et al.
-"""
+"""Layout selection using the SABRE bidirectional search approach from Li et al."""
 
 import copy
 import dataclasses
@@ -31,7 +30,14 @@ from qiskit.transpiler.layout import Layout
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.transpiler.exceptions import TranspilerError
 from qiskit._accelerate.nlayout import NLayout
-from qiskit._accelerate.sabre import sabre_layout_and_routing, Heuristic, NeighborTable, SetScaling, SwapMap, NodeBlockResults
+from qiskit._accelerate.sabre import (
+    sabre_layout_and_routing,
+    Heuristic,
+    NeighborTable,
+    SetScaling,
+    SwapMap,
+    NodeBlockResults,
+)
 from qiskit.transpiler.target import Target
 from qiskit.transpiler.coupling import CouplingMap
 from qiskit.utils.parallel import CPU_COUNT
@@ -167,8 +173,12 @@ class SabreLayout(TransformationPass):
             self.target = None
             self.coupling_map = coupling_map
         self._neighbor_table = None
-        if routing_pass is not None and (swap_trials is not None or layout_trials is not None):
-            raise TranspilerError("Both routing_pass and swap_trials can't be set at the same time")
+        if routing_pass is not None and (
+            swap_trials is not None or layout_trials is not None
+        ):
+            raise TranspilerError(
+                "Both routing_pass and swap_trials can't be set at the same time"
+            )
         self.routing_pass = routing_pass
         self.seed = seed
         self.max_iterations = max_iterations
@@ -190,7 +200,9 @@ class SabreLayout(TransformationPass):
                 if isinstance(coupling_map, CouplingMap):
                     self.coupling_map = copy.deepcopy(self.coupling_map)
                 self.coupling_map.make_symmetric()
-            self._neighbor_table = NeighborTable(rx.adjacency_matrix(self.coupling_map.graph))
+            self._neighbor_table = NeighborTable(
+                rx.adjacency_matrix(self.coupling_map.graph)
+            )
 
     def run(self, dag):
         """Run the SabreLayout pass on `dag`.
@@ -220,9 +232,13 @@ class SabreLayout(TransformationPass):
                 seed = self.seed
             rng = np.random.default_rng(seed)
 
-            physical_qubits = rng.choice(self.coupling_map.size(), len(dag.qubits), replace=False)
+            physical_qubits = rng.choice(
+                self.coupling_map.size(), len(dag.qubits), replace=False
+            )
             physical_qubits = rng.permutation(physical_qubits)
-            initial_layout = Layout({q: dag.qubits[i] for i, q in enumerate(physical_qubits)})
+            initial_layout = Layout(
+                {q: dag.qubits[i] for i, q in enumerate(physical_qubits)}
+            )
 
             self.routing_pass.fake_run = True
 
@@ -263,9 +279,12 @@ class SabreLayout(TransformationPass):
         inner_run = self._inner_run
         if "sabre_starting_layouts" in self.property_set:
             inner_run = functools.partial(
-                self._inner_run, starting_layouts=self.property_set["sabre_starting_layouts"]
+                self._inner_run,
+                starting_layouts=self.property_set["sabre_starting_layouts"],
             )
-        components = disjoint_utils.run_pass_over_connected_components(dag, target, inner_run)
+        components = disjoint_utils.run_pass_over_connected_components(
+            dag, target, inner_run
+        )
         self.property_set["layout"] = Layout(
             {
                 component.dag.qubits[logic]: component.coupling_map.graph[phys]
@@ -340,12 +359,18 @@ class SabreLayout(TransformationPass):
             component_size = component.coupling_map.size()
             dag_size = component.dag.num_qubits()
             if component_size > dag_size:
-                used_physical = {full_initial_layout[logic] for logic in component.dag.qubits}
+                used_physical = {
+                    full_initial_layout[logic]
+                    for logic in component.dag.qubits
+                }
                 component.dag.add_qubits(
                     [
                         full_initial_layout[component.coupling_map.graph[phys]]
-                        for phys in range(component.dag.num_qubits(), component_size)
-                        if component.coupling_map.graph[phys] not in used_physical
+                        for phys in range(
+                            component.dag.num_qubits(), component_size
+                        )
+                        if component.coupling_map.graph[phys]
+                        not in used_physical
                     ]
                 )
             mapped_dag = _apply_sabre_result(
@@ -371,11 +396,14 @@ class SabreLayout(TransformationPass):
             coupling_map.make_symmetric()
         neighbor_table = NeighborTable(rx.adjacency_matrix(coupling_map.graph))
         dist_matrix = coupling_map.distance_matrix
-        original_qubit_indices = {bit: index for index, bit in enumerate(dag.qubits)}
+        original_qubit_indices = {
+            bit: index for index, bit in enumerate(dag.qubits)
+        }
         partial_layouts = []
         if starting_layouts is not None:
             coupling_map_reverse_mapping = {
-                coupling_map.graph[x]: x for x in coupling_map.graph.node_indices()
+                coupling_map.graph[x]: x
+                for x in coupling_map.graph.node_indices()
             }
             for layout in starting_layouts:
                 virtual_bits = layout.get_virtual_bits()
@@ -399,16 +427,18 @@ class SabreLayout(TransformationPass):
             .with_decay(0.001, 5)
         )
         sabre_start = time.perf_counter()
-        (initial_layout, final_permutation, sabre_result) = sabre_layout_and_routing(
-            sabre_dag,
-            neighbor_table,
-            dist_matrix,
-            heuristic,
-            self.max_iterations,
-            self.swap_trials,
-            self.layout_trials,
-            self.seed,
-            partial_layouts,
+        (initial_layout, final_permutation, sabre_result) = (
+            sabre_layout_and_routing(
+                sabre_dag,
+                neighbor_table,
+                dist_matrix,
+                heuristic,
+                self.max_iterations,
+                self.swap_trials,
+                self.layout_trials,
+                self.seed,
+                partial_layouts,
+            )
         )
         sabre_stop = time.perf_counter()
         logger.debug(
@@ -461,8 +491,13 @@ class SabreLayout(TransformationPass):
         initial_layout that was selected.
         """
         trivial_layout = Layout.generate_trivial_layout(*qregs)
-        qubit_map = Layout.combine_into_edge_map(initial_layout, trivial_layout)
-        final_layout = {v: pass_final_layout._v2p[qubit_map[v]] for v in initial_layout._v2p}
+        qubit_map = Layout.combine_into_edge_map(
+            initial_layout, trivial_layout
+        )
+        final_layout = {
+            v: pass_final_layout._v2p[qubit_map[v]]
+            for v in initial_layout._v2p
+        }
         return Layout(final_layout)
 
 
