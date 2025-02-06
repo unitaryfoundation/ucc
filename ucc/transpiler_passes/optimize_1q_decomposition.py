@@ -16,7 +16,6 @@
 """Optimize chains of single-qubit gates using Euler 1q decomposer"""
 
 import logging
-import math
 
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.transpiler.passes.utils import control_flow
@@ -35,10 +34,6 @@ from qiskit.circuit.library.standard_gates import (
     SXGate,
     XGate,
 )
-from qiskit.circuit import Qubit
-from qiskit.circuit.quantumcircuitdata import CircuitInstruction
-from qiskit.dagcircuit import DAGCircuit
-from qiskit.dagcircuit.dagnode import DAGOpNode
 
 
 logger = logging.getLogger(__name__)

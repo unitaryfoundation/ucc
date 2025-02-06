@@ -25,7 +25,6 @@ from rustworkx import PyDiGraph, vf2_mapping, PyGraph
 from qiskit.transpiler.layout import Layout
 from qiskit.transpiler.basepasses import AnalysisPass
 from qiskit.transpiler.exceptions import TranspilerError
-from qiskit.providers.exceptions import BackendPropertyError
 from qiskit.circuit.library.standard_gates import get_standard_gate_name_mapping
 from qiskit.transpiler.passes.layout import vf2_utils
 

@@ -3,7 +3,6 @@ import os
 from qiskit.utils.parallel import CPU_COUNT
 from qiskit.transpiler import PassManager
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
-from qiskit.utils.parallel import CPU_COUNT
 from qiskit import user_config
 from qiskit.transpiler import CouplingMap
 from qiskit.transpiler.passes import (
@@ -17,12 +16,10 @@ from qiskit.transpiler.passes import (
     SabreSwap,
     VF2Layout,
 )
-from qiskit.transpiler.passes.synthesis.unitary_synthesis import DefaultUnitarySynthesis
 # from ucc.transpiler_passes.sabre_swap import SabreSwap
 
 
-from ..transpiler_passes import CommutativeCancellation, Collect2qBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, SpectralMapping, VF2PostLayout
-from qiskit.transpiler.passes import Optimize1qGatesSimpleCommutation, ElidePermutations
+from ..transpiler_passes import CommutativeCancellation, Collect2qBlocks, UnitarySynthesis, Optimize1qGatesDecomposition, VF2PostLayout
 
 
 CONFIG = user_config.get_config()

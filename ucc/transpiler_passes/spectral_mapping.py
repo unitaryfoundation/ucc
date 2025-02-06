@@ -1,6 +1,6 @@
 import numpy as np
 
-from scipy.linalg import eigh, orthogonal_procrustes
+from scipy.linalg import eigh
 from scipy.optimize import linear_sum_assignment
 import networkx as nx
 import random

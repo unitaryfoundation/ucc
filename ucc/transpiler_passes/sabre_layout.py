@@ -18,6 +18,7 @@ import dataclasses
 import logging
 import functools
 import time
+from typing import Sequence
 
 import numpy as np
 import rustworkx as rx
@@ -30,7 +31,7 @@ from qiskit.transpiler.layout import Layout
 from qiskit.transpiler.basepasses import TransformationPass
 from qiskit.transpiler.exceptions import TranspilerError
 from qiskit._accelerate.nlayout import NLayout
-from qiskit._accelerate.sabre import sabre_layout_and_routing, Heuristic, NeighborTable, SetScaling
+from qiskit._accelerate.sabre import sabre_layout_and_routing, Heuristic, NeighborTable, SetScaling, SwapMap, NodeBlockResults
 from qiskit.transpiler.target import Target
 from qiskit.transpiler.coupling import CouplingMap
 from qiskit.utils.parallel import CPU_COUNT

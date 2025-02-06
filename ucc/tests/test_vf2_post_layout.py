@@ -15,19 +15,13 @@
 
 """Test the VF2Layout pass"""
 
-import rustworkx
 
 
 
 from qiskit import QuantumRegister, QuantumCircuit
 from qiskit.circuit import ControlFlowOp
-from qiskit.circuit.library import CXGate, XGate
-from qiskit.transpiler import CouplingMap, Layout, TranspilerError
-from qiskit.transpiler.passes.layout.vf2_post_layout import VF2PostLayoutStopReason
 from qiskit.converters import circuit_to_dag
-from qiskit.providers.fake_provider import Fake5QV1, GenericBackendV2
-from qiskit.circuit import Qubit
-from qiskit.transpiler.target import Target, InstructionProperties
+from qiskit.providers.fake_provider import GenericBackendV2
 
 from ucc import compile
 from ucc.transpiler_passes import VF2PostLayout

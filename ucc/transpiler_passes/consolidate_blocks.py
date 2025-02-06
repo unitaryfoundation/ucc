@@ -1,6 +1,6 @@
-# This file has been modified from the original version in Qiskit. 
+# This file has been modified from the original version in Qiskit.
 
-# 
+#
 # This code is part of Qiskit.
 #
 # (C) Copyright IBM 2017, 2019.
@@ -22,6 +22,7 @@ from qiskit.circuit.classicalregister import ClassicalRegister
 from qiskit.circuit.quantumregister import QuantumRegister
 from qiskit.circuit.quantumcircuit import QuantumCircuit
 from qiskit.dagcircuit.dagnode import DAGOpNode
+from qiskit.exceptions import  QiskitError
 from qiskit.quantum_info import Operator
 from qiskit.synthesis.two_qubit import TwoQubitBasisDecomposer
 from qiskit.circuit.library.generalized_gates.unitary import UnitaryGate
