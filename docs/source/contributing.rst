@@ -13,7 +13,7 @@ The rest of this document describes the technical details of getting set up to d
 Setting up your development environment
 ---------------------------------------
 
-We leverage `poetry <https://python-poetry.org/>` for packaging and dependency management. 
+We leverage `poetry <https://python-poetry.org/>` for packaging and dependency management.
 After installing poetry, run the following commands to clone the repository, create a poetry managed virtual environment for development, and install dependencies.
 
 .. code:: bash
@@ -36,6 +36,13 @@ and build the documentation by changing to the ``docs/source`` directory where y
     make html
 
 The built documentation will then live in ``ucc/docs/source/_build/html``.
+
+We also use `pre-commit <https://pre-commit.com/>` to run code formatting and linting checks before each commit.
+To enable the pre-commit hooks, run
+
+.. code:: bash
+
+    pre-commit install
 
 .. tip::
 

@@ -28,6 +28,7 @@ packages = [{include = "ucc"}]
 pytest = ">=6.0"
 pytest-cov = ">=2.10"
 ruff = "^0.9.4"
+pre-commit = "^4.1.0"
 
 [tool.poetry.group.doc.dependencies]
 sphinx = ">=8.1.3"
