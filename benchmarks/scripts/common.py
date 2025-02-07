@@ -4,7 +4,9 @@ import os
 import pandas as pd
 import matplotlib
 from datetime import datetime
-from cirq import CZTargetGateset, optimize_for_target_gateset
+from cirq import optimize_for_target_gateset, ops
+from cirq.transformers.target_gatesets import TwoQubitCompilationTargetGateset
+import cirq
 from pytket.circuit import OpType
 from pytket.passes import (
     DecomposeBoxes,
@@ -105,10 +107,32 @@ def qiskit_compile(qiskit_circuit):
         basis_gates=["rz", "rx", "ry", "h", "cx"],
     )
 
+class BenchmarkTargetGateset(TwoQubitCompilationTargetGateset):
+    def __init__(self, atol: float = 1e-8):
+        super().__init__(ops.Rz,ops.Rx, ops.Ry, ops.H, ops.CNOT,name="BenchmarkTargetGateset")
+        self.atol = atol
+
+    def _decompose_two_qubit_operation(self, op: cirq.Operation, _) -> cirq.OP_TREE:
+        if not cirq.has_unitary(op):
+            return NotImplemented
+        mat = cirq.unitary(op)
+        q0, q1 = op.qubits
+        naive = cirq.two_qubit_matrix_to_cz_operations(q0, q1, mat, allow_partial_czs=False)
+        temp = cirq.map_operations_and_unroll(
+            cirq.Circuit(naive),
+            lambda op, _: (
+                [cirq.H(op.qubits[1]), cirq.CNOT(*op.qubits), cirq.H(op.qubits[1])]
+                if op.gate == cirq.CZ
+                else op
+            ),
+        )
+        return cirq.merge_k_qubit_unitaries(
+            temp, k=1, rewriter=lambda op: self._decompose_single_qubit_operation(op, -1)
+        ).all_operations()
 
 # Cirq compilation
 def cirq_compile(cirq_circuit):
-    return optimize_for_target_gateset(cirq_circuit, gateset=CZTargetGateset())
+    return optimize_for_target_gateset(cirq_circuit, gateset=BenchmarkTargetGateset())
 
 
 # Multi-qubit gate count for PyTkets
