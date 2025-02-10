@@ -4,8 +4,8 @@ import os
 import pandas as pd
 import matplotlib
 from datetime import datetime
-from cirq import optimize_for_target_gateset, ops
-from cirq.transformers.target_gatesets import TwoQubitCompilationTargetGateset
+from typing import Dict, Any, List
+from cirq import optimize_for_target_gateset
 import cirq
 from pytket.circuit import OpType
 from pytket.passes import (
@@ -107,32 +107,112 @@ def qiskit_compile(qiskit_circuit):
         basis_gates=["rz", "rx", "ry", "h", "cx"],
     )
 
-class BenchmarkTargetGateset(TwoQubitCompilationTargetGateset):
-    def __init__(self, atol: float = 1e-8):
-        super().__init__(ops.Rz,ops.Rx, ops.Ry, ops.H, ops.CNOT,name="BenchmarkTargetGateset")
+
+class BenchmarkTargetGateset(cirq.TwoQubitCompilationTargetGateset):
+    """Target gateset for compiling circuits for benchmarking.
+
+    This is based on the IonQTargetGateset in cirq_ionq package
+
+    The gate families accepted by this gateset are:
+
+    Instance gate families:
+    *  Single-Qubit Gates: `cirq.H`, `cirq.Rx`, `cirq.Ry`, `cirq.Rz`.
+    *  Two-Qubit Gates: `cirq.CNOT`
+    *  `cirq.MeasurementGate`
+    """
+
+    def __init__(self, *, atol: float = 1e-8):
+        """Initializes BenchmarkTargetGateset
+
+        Args:
+            atol: A limit on the amount of absolute error introduced by the decomposition.
+        """
+        super().__init__(
+            cirq.H,
+            cirq.CNOT,
+            cirq.Rx,
+            cirq.Ry,
+            cirq.Rz,
+            cirq.MeasurementGate,
+            unroll_circuit_op=False,
+        )
         self.atol = atol
 
-    def _decompose_two_qubit_operation(self, op: cirq.Operation, _) -> cirq.OP_TREE:
+    def _decompose_single_qubit_operation(
+        self, op: cirq.Operation, _
+    ) -> cirq.OP_TREE:
+        qubit = op.qubits[0]
+        mat = cirq.unitary(op)
+        for gate in cirq.single_qubit_matrix_to_gates(mat, self.atol):
+            yield gate(qubit)
+
+    def _decompose_two_qubit_operation(
+        self, op: cirq.Operation, _
+    ) -> cirq.OP_TREE:
         if not cirq.has_unitary(op):
             return NotImplemented
         mat = cirq.unitary(op)
         q0, q1 = op.qubits
-        naive = cirq.two_qubit_matrix_to_cz_operations(q0, q1, mat, allow_partial_czs=False)
+        naive = cirq.two_qubit_matrix_to_cz_operations(
+            q0, q1, mat, allow_partial_czs=False
+        )
         temp = cirq.map_operations_and_unroll(
             cirq.Circuit(naive),
             lambda op, _: (
-                [cirq.H(op.qubits[1]), cirq.CNOT(*op.qubits), cirq.H(op.qubits[1])]
+                [
+                    cirq.H(op.qubits[1]),
+                    cirq.CNOT(*op.qubits),
+                    cirq.H(op.qubits[1]),
+                ]
                 if op.gate == cirq.CZ
                 else op
             ),
         )
         return cirq.merge_k_qubit_unitaries(
-            temp, k=1, rewriter=lambda op: self._decompose_single_qubit_operation(op, -1)
+            temp,
+            k=1,
+            rewriter=lambda op: self._decompose_single_qubit_operation(op, -1),
         ).all_operations()
+
+    @property
+    def preprocess_transformers(self) -> List["cirq.TRANSFORMER"]:
+        """List of transformers which should be run before decomposing individual operations.
+
+        Decompose to three qubit gates because three qubit gates have different decomposition
+        for all-to-all connectivity between qubits.
+        """
+        return [
+            cirq.create_transformer_with_kwargs(
+                cirq.expand_composite,
+                no_decomp=lambda op: cirq.num_qubits(op) <= 2,
+            )
+        ]
+
+    @property
+    def postprocess_transformers(self) -> List["cirq.TRANSFORMER"]:
+        """List of transformers which should be run after decomposing individual operations."""
+        return [cirq.drop_negligible_operations, cirq.drop_empty_moments]
+
+    def __repr__(self) -> str:
+        return f"BenchmarkTargetGateset(atol={self.atol})"
+
+    def _value_equality_values_(self) -> Any:
+        return self.atol
+
+    def _json_dict_(self) -> Dict[str, Any]:
+        return cirq.obj_to_dict_helper(self, ["atol"])
+
+    @classmethod
+    def _from_json_dict_(cls, atol, **kwargs):
+        return cls(atol=atol)
+
 
 # Cirq compilation
 def cirq_compile(cirq_circuit):
-    return optimize_for_target_gateset(cirq_circuit, gateset=BenchmarkTargetGateset())
+    res = optimize_for_target_gateset(
+        cirq_circuit, gateset=BenchmarkTargetGateset()
+    )
+    return res
 
 
 # Multi-qubit gate count for PyTkets
