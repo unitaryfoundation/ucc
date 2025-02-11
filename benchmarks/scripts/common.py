@@ -141,10 +141,10 @@ class BenchmarkTargetGateset(cirq.TwoQubitCompilationTargetGateset):
     def _decompose_single_qubit_operation(
         self, op: cirq.Operation, _
     ) -> cirq.OP_TREE:
-        qubit = op.qubits[0]
         mat = cirq.unitary(op)
-        for gate in cirq.single_qubit_matrix_to_gates(mat, self.atol):
-            yield gate(qubit)
+        return cirq.circuits.qasm_output.QasmUGate.from_matrix(
+            mat
+        )._decompose_(op.qubits)
 
     def _decompose_two_qubit_operation(
         self, op: cirq.Operation, _
@@ -175,23 +175,15 @@ class BenchmarkTargetGateset(cirq.TwoQubitCompilationTargetGateset):
         ).all_operations()
 
     @property
-    def preprocess_transformers(self) -> List["cirq.TRANSFORMER"]:
-        """List of transformers which should be run before decomposing individual operations.
-
-        Decompose to three qubit gates because three qubit gates have different decomposition
-        for all-to-all connectivity between qubits.
-        """
-        return [
-            cirq.create_transformer_with_kwargs(
-                cirq.expand_composite,
-                no_decomp=lambda op: cirq.num_qubits(op) <= 2,
-            )
-        ]
-
-    @property
     def postprocess_transformers(self) -> List["cirq.TRANSFORMER"]:
         """List of transformers which should be run after decomposing individual operations."""
-        return [cirq.drop_negligible_operations, cirq.drop_empty_moments]
+        processors: List["cirq.TRANSFORMER"] = [
+            cirq.transformers.drop_negligible_operations,
+            cirq.transformers.drop_empty_moments,
+        ]
+        if not self._preserve_moment_structure:
+            processors.append(cirq.transformers.stratified_circuit)
+        return processors
 
     def __repr__(self) -> str:
         return f"BenchmarkTargetGateset(atol={self.atol})"
