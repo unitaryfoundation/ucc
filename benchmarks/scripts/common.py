@@ -113,8 +113,8 @@ def qiskit_compile(qiskit_circuit):
 class BenchmarkTargetGateset(cirq.TwoQubitCompilationTargetGateset):
     """Target gateset for compiling circuits for benchmarking.
 
-     This is modeled off cirq's CZCompilationTargetGateset, but instead:
-         * Decomposes single-qubit gates into Rz, Ry, and Rz gates versus XZPowGate.
+     This is modeled off cirq's `CZCompilationTargetGateset`_, but instead:
+         * Decomposes non target gateset single-qubit gates into Rz, Ry gates versus XZPowGate.
          * Decomposes two-qubit gates into CNOT gates versus CZPowGate.
          * Overrides the base classes postprocess_transformers to eliminate the
            merge_single_qubit_moments_to_phxz pass to avoid re-introducing XZPowGates.
@@ -123,6 +123,8 @@ class BenchmarkTargetGateset(cirq.TwoQubitCompilationTargetGateset):
      *  Single-Qubit Gates: `cirq.H`, `cirq.Rx`, `cirq.Ry`, `cirq.Rz`.
      *  Two-Qubit Gates: `cirq.CNOT`
      *  `cirq.MeasurementGate`
+
+     .. _CZCompilationTargetGateset: https://github.com/quantumlib/Cirq/blob/dd3df78c045a03b2de70b2d54d8582abbfc1f6c2/cirq-core/cirq/transformers/target_gatesets/cz_gateset.py#L27
     """
 
     def __init__(self):
@@ -138,7 +140,7 @@ class BenchmarkTargetGateset(cirq.TwoQubitCompilationTargetGateset):
         )
 
     def _decompose_single_qubit_operation(
-        self, op: cirq.Operation, _
+        self, op: cirq.Operation, moment_idx: int
     ) -> cirq.OP_TREE:
         if not cirq.protocols.has_unitary(op):
             return NotImplemented
