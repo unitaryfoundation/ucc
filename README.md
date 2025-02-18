@@ -103,4 +103,4 @@ If you have questions about contributing please ask on the [Unitary Foundation D
 ## License
 
 UCC is distributed under [GNU Affero General Public License version 3.0](https://www.gnu.org/licenses/agpl-3.0.en.html)(AGPLv3).
-Parts of ucc contain code or modified code that is part of Qiskit, which is distributed under Apache 2.0 license.
+Parts of ucc contain code or modified code that is part of [Qiskit](https://github.com/Qiskit/qiskit) or [Qiskit Benchpress](https://github.com/Qiskit/benchpress), which are distributed under Apache 2.0 license.
