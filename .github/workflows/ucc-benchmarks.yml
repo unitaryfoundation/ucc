@@ -51,7 +51,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git switch ${{ github.head_ref || github.ref_name }}
-          git add -f benchmarks/*
+          git add benchmarks/*
           git status
           git commit -m "Update benchmark results [benchmark chore]" || echo "No changes to commit"
           git push origin HEAD:${{ github.head_ref || github.ref_name }} --force
