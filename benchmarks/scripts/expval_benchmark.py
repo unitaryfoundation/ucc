@@ -83,7 +83,9 @@ def simulate_density_matrix(circuit: qiskit.QuantumCircuit) -> np.ndarray:
         circuit, SINGLE_QUBIT_ERROR_RATE, TWO_QUBIT_ERROR_RATE
     )
     simulator = AerSimulator(
-        method="density_matrix", noise_model=depolarizing_noise
+        method="density_matrix",
+        noise_model=depolarizing_noise,
+        max_parallel_threads=1,
     )
     return simulator.run(circuit).result().data()["density_matrix"]
 
@@ -161,7 +163,7 @@ def fetch_pre_post_compiled_circuits(
 
 def get_heavy_bitstrings(circuit: qiskit.QuantumCircuit) -> Set[str]:
     """ "Determine the heavy bitstrings of the circuit."""
-    simulator = AerSimulator(method="statevector")
+    simulator = AerSimulator(method="statevector", max_parallel_threads=1)
     result = simulator.run(circuit, shots=1024).result()
     counts = list(result.get_counts().items())
     median = np.median([c for (_, c) in counts])
@@ -190,11 +192,10 @@ def estimate_heavy_output_prob(
             noise_model=create_depolarizing_noise_model(
                 circuit, SINGLE_QUBIT_ERROR_RATE, TWO_QUBIT_ERROR_RATE
             ),
+            max_parallel_threads=1,
         )
     else:
-        simulator = AerSimulator(
-            method="statevector",
-        )
+        simulator = AerSimulator(method="statevector", max_parallel_threads=1)
     result = simulator.run(circuit).result()
 
     heavy_counts = sum(

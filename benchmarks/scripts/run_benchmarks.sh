@@ -38,13 +38,17 @@ for qasm_file in "${QASM_FILES[@]}"; do
     for compiler in "${COMPILERS[@]}"; do
         # Combine the common folder path with the QASM file
         full_qasm_file="${QASM_FOLDER}${qasm_file}"
-        
+
         # Build the command, passing the results folder as an argument
         command="python3 $(dirname "$0")/benchmark_script.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\""
 
         commands+=("$command")
     done
 done
+# Execute the timing benchmarks in parallel up to the specified number of parallel jobs
+# Intentionally run these first to avoid contention with expected value benchmarks below
+# that could impact timing results
+parallel -j "$PARALLELISM" ::: "${commands[@]}"
 
 QASM_EXPVAL_FILES=(
     "benchpress/qaoa_barabasi_albert_N10_3reps_basis_rz_rx_ry_cx.qasm"
@@ -55,11 +59,12 @@ QASM_EXPVAL_FILES=(
     "ucc/qcnn_N10_4layers_basis_rz_rx_ry_h_cx.qasm"
 )
 LOG_EXPVAL=false
+commands=()
 for qasm_file in "${QASM_EXPVAL_FILES[@]}"; do
     for compiler in "${COMPILERS[@]}"; do
         # Combine the common folder path with the QASM file
         full_qasm_file="${QASM_FOLDER}${qasm_file}"
-        
+
         # Build the command, passing the results folder as an argument
         command="poetry run python $(dirname "$0")/expval_benchmark.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\" $LOG_EXPVAL"
 
@@ -67,5 +72,5 @@ for qasm_file in "${QASM_EXPVAL_FILES[@]}"; do
     done
 done
 
-# Execute all the commands in parallel up to the specified number of parallel jobs
+# Execute the expected value benchmarks in parallel up to the specified number of parallel jobs
 parallel -j "$PARALLELISM" ::: "${commands[@]}"

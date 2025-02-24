@@ -23,9 +23,6 @@ POETRY_VIRTUALENVS_PATH=/venv
 # Install (rarely changing) dependencies only using Poetry to leverage docker caching
 RUN --mount=type=cache,target=/tmp/poetry_cache poetry install --no-root
 
-# Update to the latest version of the compiler libraries dependent libraries
-RUN --mount=type=cache,target=/tmp/poetry_cache poetry update
-
 # Install the `ucc` package itself
 RUN poetry install
 

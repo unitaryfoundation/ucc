@@ -12,6 +12,10 @@ on:
         required: false
         default: 'main'
 
+# Ensure only one instance of the workflow is running at a time
+concurrency:
+  group: ${{ github.workflow }}
+
 jobs:
   run-benchmarks:
     runs-on: ucc-benchmarks-8-core-U22.04
