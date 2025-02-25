@@ -27,7 +27,7 @@ By leveraging [qBraid](https://github.com/qBraid/qBraid), UCC interfaces automat
 pip install ucc
 ```
 
-If developing or running benchmark, please install [Poetry](https://python-poetry.org/), then setup a dev version:
+If developing or running benchmark, please install [Poetry](https://github.com/python-poetry/install.python-poetry.org), then setup a dev version:
 
 ```bash
 git clone https://github.com/unitaryfund/ucc.git
