@@ -3,6 +3,7 @@ import platform
 import os
 import pandas as pd
 import matplotlib
+import matplotlib.pyplot as plt
 from datetime import datetime
 from cirq import CZTargetGateset, optimize_for_target_gateset
 from pytket.circuit import OpType
@@ -198,7 +199,7 @@ def get_qasm_files():
     return sys.argv[1:]
 
 
-def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), increment=5, fontsize=8, max_attempts=20, rotation=15):
+def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), increment=5, fontsize=8, max_attempts=20, rotation=15, margin=0.01):
     """
     Annotates the plot while dynamically adjusting the position to avoid overlaps. In-place operation.
 
@@ -212,7 +213,9 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
         increment (int): The vertical adjustment increment in points to resolve overlaps.
         fontsize (int): Font size of the annotation text.
         max_attempts (int): The maximum number of position adjustments to resolve overlaps.
-        #TODO: Add margin parameter to adjust the bounding box size. Can be an issue when comparing dates which are strings
+        rotation (int): Rotation angle of the annotation text.
+        margin (float): Margin to adjust bounding box size.
+
     Returns:
         None
     """
@@ -220,8 +223,8 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
     annotation = ax.annotate(
         text,
         xy,
-        textcoords="offset points",
-        xytext=offset,  # Default offset
+        textcoords="offset points",  # Keep offset relative to xy
+        xytext=offset,  
         ha='center',
         fontsize=fontsize,
         color=color,
@@ -244,44 +247,52 @@ def annotate_and_adjust(ax, text, xy, color, previous_bboxes, offset=(0, 15), in
     # Force a renderer update to ensure bounding box accuracy
     ax.figure.canvas.draw()
     renderer = ax.figure.canvas.get_renderer()
-
-    # Get the bounding box of the annotation in data coordinates
+    
+    # Get initial bounding box
     bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
-    print(f"Initial annotation: '{text}' at {xy}, \n bbox: {bbox}", '\n')
+    print(f"Initial annotation: '{text}' at {xy}, bbox: {bbox}\n")
 
     attempts = 0
-    current_offset = offset[1]
-    # Adjust position to avoid overlap
-    while any(bbox.overlaps(prev_bbox) for prev_bbox in previous_bboxes):
+    current_offset = list(offset)  # Convert to list so we can modify
+
+    # Overlap check function
+    def bbox_overlap_with_margin(bbox1, bbox2, margin=0.1):
+        """Returns True if two bounding boxes overlap with a margin."""
+        return (bbox1.x0 < bbox2.x1 + margin and bbox1.x1 > bbox2.x0 - margin and
+                bbox1.y0 < bbox2.y1 + margin and bbox1.y1 > bbox2.y0 - margin)
+
+    while any(bbox_overlap_with_margin(bbox, prev_bbox, margin) for prev_bbox in previous_bboxes):
+        
         for prev_bbox in previous_bboxes:
             if bbox.overlaps(prev_bbox):
-                print(f"\nBox at position {bbox}\nOverlapping with previous annotation:\n"
+                print(f"\nBox at position {bbox} overlaps with:\n"
                       f"  Previous bbox: {prev_bbox}\n"
                       f"  Annotation text: '{annotation.get_text()}'\n")
-                input()
                 break
-        # Increase vertical offset to move annotation upward
-        current_offset += increment
 
-        # TODO: I think this is the issue causing it to think there are still overlaps when it does not visually appear so. It appears y1 is being updated but not y0 in the bbox
-        annotation.set_position((offset[0], current_offset))
-        
-        
-        # Force the renderer to update after position adjustment
+        # Move the annotation upward by increment (relative)
+        current_offset[1] += increment  # Increment y-offset in points
+        print(f"Adjusting annotation '{text}' to new position: {current_offset}")
+
+        # Apply the new relative offset
+        annotation.set_position(current_offset)
+
+        # Update renderer and bbox
         ax.figure.canvas.draw()
-        bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
+        plt.pause(0.1)  # Allow GUI update
 
-        # Update the plot to show the new position
-        ax.figure.canvas.flush_events()
-        # Increment the attempt counter and check for max attempts
+        # Get the updated bounding box
+        bbox = annotation.get_tightbbox(renderer).transformed(ax.transData.inverted())
+        print(f"Updated bbox after move: {bbox}")
+
+        # Prevent infinite loops
         attempts += 1
         if attempts >= max_attempts:
             print(f"Warning: Maximum adjustment attempts reached for annotation '{text}'.")
             break
 
-    # Add the final bounding box to the list of previous bounding boxes
+    # Store the final bbox to prevent future overlaps
     previous_bboxes.append(bbox)
-
 
 
 def adjust_axes_to_fit_labels(ax, x_scale=1.0, y_scale=1.0, x_log=False, y_log=False):

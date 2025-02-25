@@ -33,7 +33,7 @@ for file in csv_files:
     dataframes.append(df)
 
 df_dates = pd.concat(dataframes, ignore_index=True)
-
+df['date'] = pd.to_datetime(df['date'])
 # Find the average compiled ratio for each compiler on each date
 avg_compiled_ratio = df_dates.groupby(["compiler", "date", "compiler_version"])["compiled_ratio"].mean().reset_index().sort_values("date")
 
@@ -95,10 +95,11 @@ for date in avg_compiled_ratio["date"].unique():
                 xy=xy,
                 color=color,
                 previous_bboxes=previous_bboxes,
-                offset=(0, 15),  # Initial offset
+                offset=(0, 25),  # Initial offset
                 increment=2,  # Vertical adjustment step
-                max_attempts=20,
-                rotation=30
+                max_attempts=10,
+                rotation=15,
+                margin=0.001
             )
             plt.pause(0.1)
             # Update the last seen version for this compiler
@@ -112,7 +113,8 @@ ax[0].set_ylabel("Compiled Ratio")
 # ax[0].set_ylim(0.745, 0.96)
 # Expand axes to be slightly larger than data range
 ax[0].legend(title="Compiler")
-
+print("pausing before plotting compile time")
+input()
 
 #### Plot Compile time
 # Get runtime data only after we created GitHub Actions pipeline for standardization
@@ -161,9 +163,9 @@ for date in avg_compile_time["date"].unique():
                 offset=(0, 15),  # Initial offset
                 increment=2,  # Vertical adjustment step
                 max_attempts=10,
-                rotation=15
+                rotation=25
             )
-            # plt.pause(0.1)
+            plt.pause(0.1)
             # Update the last seen version for this compiler
             last_version_seen[compiler] = current_version
 
