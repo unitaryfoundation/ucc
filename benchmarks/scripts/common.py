@@ -9,10 +9,7 @@ from cirq import optimize_for_target_gateset
 import cirq
 from pytket.circuit import OpType
 from pytket.passes import (
-    DecomposeBoxes,
-    RemoveRedundancies,
     SequencePass,
-    SimplifyInitial,
     AutoRebase,
     FullPeepholeOptimise
 )
