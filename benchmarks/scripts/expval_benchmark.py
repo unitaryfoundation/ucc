@@ -10,11 +10,13 @@ from qiskit import qasm2
 from qiskit.quantum_info import Operator, Statevector, SparsePauliOp
 from qiskit_aer import AerSimulator
 import numpy as np
+from bqskit.ext import bqskit_to_qiskit
 
 from common import (
     cirq_compile,
     pytket_peep_compile,
     qiskit_compile,
+    bqskit_compile,
     save_results,
     get_native_rep,
     create_depolarizing_noise_model,
@@ -32,9 +34,9 @@ def compile_for_simulation(
 
     Args:
         circuit: The circuit to be compiled. Can be any of the supported
-            circuit representations (cirq, qiskit, pytket)
+            circuit representations (cirq, qiskit, pytket, bqskit).
         compiler_alias: The alias of the compiler to be used for compilation.
-            Can be one of "ucc", "qiskit", "cirq", "pytket", or "none".
+            Can be one of "ucc", "qiskit", "cirq", "pytket", "bqskit" or "none".
 
     Returns:
         A compiled circuit having used the compiler affiliated with the
@@ -65,6 +67,10 @@ def compile_for_simulation(
             cirq_compiled_qiskit.save_density_matrix()
             return cirq_compiled_qiskit
 
+        case "bqskit":
+            bqskit_compiled_qiskit = bqskit_to_qiskit(bqskit_compile(circuit))
+            bqskit_compiled_qiskit.save_density_matrix()
+            return bqskit_compiled_qiskit
         case _:
             raise ValueError(f"Unknown compiler alias: {compiler_alias}")
 

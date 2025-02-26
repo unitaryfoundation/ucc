@@ -72,6 +72,43 @@ files = [
 dev = ["backports.zoneinfo", "freezegun (>=1.0,<2.0)", "jinja2 (>=3.0)", "pytest (>=6.0)", "pytest-cov", "pytz", "setuptools", "tzdata"]
 
 [[package]]
+name = "bqskit"
+version = "1.2.0"
+description = "Berkeley Quantum Synthesis Toolkit"
+optional = false
+python-versions = "<4,>=3.8"
+groups = ["main"]
+files = [
+    {file = "bqskit-1.2.0-py3-none-any.whl", hash = "sha256:b3a5e820bc319c126c50f0750896801d340841d2b70758a769dd4d2efcd9bc74"},
+    {file = "bqskit-1.2.0.tar.gz", hash = "sha256:5772491f997474bacd1016fed4835b93e5d0901476fdac44518c731815cd0c88"},
+]
+
+[package.dependencies]
+bqskitrs = ">=0.4.1"
+dill = ">=0.3.8"
+lark = "*"
+numpy = ">=1.22.0"
+scipy = ">=1.8.0"
+typing-extensions = ">=4.0.0"
+
+[package.extras]
+dev = ["hypothesis[zoneinfo]", "mypy", "pre-commit", "psutil", "pytest", "tox"]
+
+[[package]]
+name = "bqskitrs"
+version = "0.4.1"
+description = ""
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "bqskitrs-0.4.1-cp38-abi3-macosx_10_12_x86_64.whl", hash = "sha256:12e54f7b1022c7f94223b8587dcdc0b8a4a1f886ebf41fcd2b26a7428880ac06"},
+    {file = "bqskitrs-0.4.1-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:4412e27f7d0fdd06e73d9cb347f5bd8c4f55f5a8477eded39f24b938d0380e42"},
+    {file = "bqskitrs-0.4.1-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:1f8be7289bea26ca862c789210937aa0ef630a5505440e4c3b2799896e7a6aa2"},
+    {file = "bqskitrs-0.4.1-cp38-abi3-win_amd64.whl", hash = "sha256:92f438063ce769a5fdb35220666cd90bb6c20551147cc5c72e77b0996fb4bef4"},
+]
+
+[[package]]
 name = "certifi"
 version = "2025.1.31"
 description = "Python package for providing Mozilla's CA Bundle."
@@ -2473,4 +2510,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12,<4"
-content-hash = "c6c0696ff93c26c68ee4f812cd65d48ea93682ef1a5430e425fa3d118f93b2a7"
+content-hash = "16f92417f9f9850c3cca842444baebebfdad9d6f5578eddfdfd8fec634f9e10f"

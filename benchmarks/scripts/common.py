@@ -8,6 +8,7 @@ from typing import List
 from cirq import optimize_for_target_gateset
 import cirq
 from pytket.circuit import OpType
+
 from pytket.passes import (
     SequencePass,
     AutoRebase,
@@ -65,6 +66,8 @@ def get_compile_function(compiler_alias):
             return qiskit_compile
         case "cirq":
             return cirq_compile
+        case "bqskit":
+            return bqskit_compile
         case _:
             raise ValueError(f"Unknown compiler alias: {compiler_alias}")
 
@@ -80,6 +83,10 @@ def get_native_rep(qasm_string, compiler_alias):
         native_circuit = translate(qasm_string, "qiskit")
     elif compiler_alias == "pytket-peep":
         native_circuit = translate(qasm_string, "pytket")
+    elif compiler_alias == "bqskit":
+        from bqskit.ir.lang.qasm2 import OPENQASM2Language
+
+        native_circuit = OPENQASM2Language().decode(qasm_string)
     else:
         native_circuit = translate(qasm_string, compiler_alias)
 
@@ -203,6 +210,24 @@ def cirq_compile(cirq_circuit):
     return res
 
 
+def bqskit_compile(bqskit_circuit):
+    from bqskit.ir.gates import RXGate, RYGate, RZGate, HGate, CXGate
+    from bqskit import MachineModel
+    from bqskit.compiler import Compiler
+
+    from bqskit.compiler.compile import build_workflow
+
+    gate_set = {RXGate(), RYGate(), RZGate(), HGate(), CXGate()}
+
+    with Compiler(num_workers=1, num_blas_threads=1) as c:
+        workflow = build_workflow(
+            bqskit_circuit,
+            model=MachineModel(bqskit_circuit.num_qudits, gate_set=gate_set),
+            optimization_level=1,
+        )
+        return c.compile(bqskit_circuit, workflow=workflow)
+
+
 def get_n_qubit_gateset(
     circuit: qiskit.QuantumCircuit, num_qubits: int
 ) -> set[str]:
@@ -277,6 +302,15 @@ def count_multi_qubit_gates_cirq(cirq_circuit):
     )
 
 
+# Count multi-qbuit gates for bqskit
+def count_multi_qubit_gates_bqksit(bqksit_circuit):
+    return sum(
+        count
+        for gate, count in bqksit_circuit.gate_counts.items()
+        if gate.num_qudits > 1
+    )
+
+
 def count_multi_qubit_gates(circuit, compiler_alias):
     match compiler_alias:
         case "ucc" | "qiskit":
@@ -285,6 +319,8 @@ def count_multi_qubit_gates(circuit, compiler_alias):
             return count_multi_qubit_gates_cirq(circuit)
         case "pytket-peep":
             return count_multi_qubit_gates_pytket(circuit)
+        case "bqskit":
+            return count_multi_qubit_gates_bqksit(circuit)
         case _:
             return "Unknown compiler alias."
 
