@@ -36,7 +36,9 @@ def test_tket_compile():
     assert isinstance(result_circuit, TketCircuit)
 
 
-@pytest.mark.parametrize("circuit_function", [qcnn_circuit, random_clifford_circuit])
+@pytest.mark.parametrize(
+    "circuit_function", [qcnn_circuit, random_clifford_circuit]
+)
 @pytest.mark.parametrize("num_qubits", [6, 7, 8, 9, 10])
 @pytest.mark.parametrize("seed", [1, 326, 5678, 12345])
 def test_compilation_retains_gateset(circuit_function, num_qubits, seed):
@@ -47,10 +49,12 @@ def test_compilation_retains_gateset(circuit_function, num_qubits, seed):
     dag = circuit_to_dag(transpiled_circuit)
     analysis_pass = GatesInBasis(basis_gates=target_basis)
     analysis_pass.run(dag)
-    assert analysis_pass.property_set["all_gates_in_basis"] == True
+    assert analysis_pass.property_set["all_gates_in_basis"]
 
 
-@pytest.mark.parametrize("circuit_function", [qcnn_circuit, random_clifford_circuit])
+@pytest.mark.parametrize(
+    "circuit_function", [qcnn_circuit, random_clifford_circuit]
+)
 @pytest.mark.parametrize("num_qubits", [6, 7, 8, 9, 10, 15])
 @pytest.mark.parametrize("seed", [1, 326, 5678, 12345])
 def test_compiled_circuits_equivalent(circuit_function, num_qubits, seed):

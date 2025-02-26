@@ -16,6 +16,7 @@ Welcome to the docs!
    User Guide <user_guide.rst>
    API-doc <api.rst>
    Contributing Guide <contributing.rst>
+   Benchmarking <benchmarking.rst>
    Developer Documentation <dev.rst>
    Code of Conduct <CODE_OF_CONDUCT.rst>
 

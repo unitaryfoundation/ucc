@@ -1,0 +1,3 @@
+# Compiler versions: qiskit=1.4.0, cirq=1.4.1, pytket=1.40.0, ucc=0.4.2 # OS: Linux #26~22.04.1-Ubuntu SMP Thu Jul 11 22:33:04 UTC 2024, Architecture: 64bit, CPU Cores: 8
+compiler,circuit_name,observable,expval,absolute_error,relative_error,ideal_expval
+cirq,prep_select,ZZZZZZZZZZ,1.3519025308939003e-14,1.352116000689658e-14,6333.992103616885,-2.13469795757649e-18

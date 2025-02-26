@@ -7,16 +7,13 @@ It can be used with multiple quantum computing frameworks, including `Qiskit <ht
 Installation
 *************
 
-To install ``ucc`` run:
+To install ``ucc`` run
 
 .. code:: bash
 
-   git clone https://github.com/unitaryfund/ucc.git
-   cd ucc
-   pip install -e . # Editable mode
+   pip install ucc
 
-
-UCC requires Python version :math:`\ge` 3.12. 
+UCC requires Python version ≥ 3.12. 
 
 Basic usage
 ***********
@@ -30,7 +27,7 @@ For example, we can define a random circuit in Qiskit and optimize it using the 
 
    from qiskit.circuit.random import random_clifford_circuit
    import ucc
-   from ucc.benchmarks.utils import count_multi_qubit_gates_qiskit
+   from benchmarks.scripts.common import count_multi_qubit_gates_qiskit
 
 
    gates = ["cx", "cz", "cy", "swap", "x", "y", "z", "s", "sdg", "h"]

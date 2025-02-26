@@ -1,13 +1,15 @@
 .DS_Store
 .vscode
 .python-version
+# local overrides for act github action tests
+.act*
 .idea/
 *.dat
 *.hdf5
 *.ipynb_checkpoints
 *.jupyter_cache
 _build
-*__pycache__/
+__pycache__/
 docs/build/
 *.egg-info/
 dist/

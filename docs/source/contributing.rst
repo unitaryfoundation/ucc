@@ -13,14 +13,17 @@ The rest of this document describes the technical details of getting set up to d
 Setting up your development environment
 ---------------------------------------
 
-We recommend creating a virtual environment to install the required dependencies.
-Once this is set up using the tool of your choice, install the dependencies and ``ucc`` in editable mode by running the following command in the root directory of the repository.
+We leverage `poetry <https://python-poetry.org/>`_ for packaging and dependency management.
+After installing poetry, run the following commands to clone the repository, create a poetry managed virtual environment for development, and install dependencies.
 
 .. code:: bash
 
-    pip install -e .
+    git clone https://github.com/unitaryfund/ucc.git
+    cd ucc
+    poetry install
 
-With this set up you can now run tests using
+For all of the following commands, either first run ``poetry shell`` to enable the poetry managed virtual environment,
+or prefix each command with ``poetry run``.
 
 .. code:: bash
 
@@ -33,6 +36,13 @@ and build the documentation by changing to the ``docs/source`` directory where y
     make html
 
 The built documentation will then live in ``ucc/docs/source/_build/html``.
+
+We also use `pre-commit <https://pre-commit.com/>`_ to run code formatting and linting checks before each commit.
+To enable the pre-commit hooks, run
+
+.. code:: bash
+
+    pre-commit install
 
 .. tip::
 
@@ -70,7 +80,7 @@ When proposing a new transpiler pass, please include a detailed report containin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Once the prototype is validated, implement the new pass in the codebase.
-Documentation to guide you through this process is available in the `User Guide <user_guide>`_.
+Documentation to guide you through this process is available in the :doc:`user guide <user_guide>`.
 For more detailed information and examples, refer to the `Qiskit documentation <https://docs.quantum.ibm.com/guides/custom-transpiler-pass>`_.
 
 4. Clear Acceptance Criteria for Incorporation into default transpiler
