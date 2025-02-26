@@ -409,9 +409,6 @@ def annotate_and_adjust(
         textcoords="offset points",  # Keep offset relative to xy
         xytext=offset,  
         ha='center',
-        textcoords="offset points",
-        xytext=offset,  # Default offset
-        ha="center",
         fontsize=fontsize,
         color=color,
         rotation=rotation,
