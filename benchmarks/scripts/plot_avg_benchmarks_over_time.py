@@ -31,7 +31,8 @@ for file in csv_files:
     df["date"] = date_label
     df["compiled_ratio"] = df["compiled_multiq_gates"] / df["raw_multiq_gates"]
     df["compiler_version"] = df["compiler"].map(compiler_versions)
-
+    df['compiler'] = df['compiler'].replace('qiskit', 'qiskit-default')
+    
     dataframes.append(df)
 
 df_dates = pd.concat(dataframes, ignore_index=True)
