@@ -8,11 +8,7 @@ from typing import List
 from cirq import optimize_for_target_gateset
 import cirq
 from pytket.circuit import OpType
-from pytket.passes import (
-    SequencePass,
-    AutoRebase,
-    FullPeepholeOptimise
-)
+from pytket.passes import SequencePass, AutoRebase, FullPeepholeOptimise
 from pytket.predicates import CompilationUnit
 import qiskit
 from qiskit_aer.noise import NoiseModel, depolarizing_error
