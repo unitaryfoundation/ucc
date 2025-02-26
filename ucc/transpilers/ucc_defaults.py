@@ -15,11 +15,6 @@ from qiskit.transpiler.passes import (
     SabreLayout,
     SabreSwap,
     VF2Layout,
-)
-# from ucc.transpiler_passes.sabre_swap import SabreSwap
-
-
-from ..transpiler_passes import (
     CommutativeCancellation,
     Collect2qBlocks,
     UnitarySynthesis,
@@ -29,9 +24,6 @@ from ..transpiler_passes import (
 
 
 CONFIG = user_config.get_config()
-
-
-# from ucc_passes.entanglement_net_to_layout import Decompose2qNetworkWithMap
 
 
 class UCCDefault1:
@@ -62,12 +54,7 @@ class UCCDefault1:
                 BasisTranslator(sel, target_basis=self.target_basis)
             )
             self.pass_manager.append(Optimize1qGatesDecomposition())
-            self.pass_manager.append(
-                CommutativeCancellation(
-                    standard_gates=self.target_basis,
-                    special_commutations=self.special_commutations,
-                )
-            )
+            self.pass_manager.append(CommutativeCancellation())
             self.pass_manager.append(Collect2qBlocks())
             self.pass_manager.append(ConsolidateBlocks(force_consolidate=True))
             self.pass_manager.append(
