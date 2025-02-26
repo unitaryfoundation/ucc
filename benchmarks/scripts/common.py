@@ -14,6 +14,7 @@ from pytket.passes import (
     SequencePass,
     SimplifyInitial,
     AutoRebase,
+    FullPeepholeOptimise
 )
 from pytket.predicates import CompilationUnit
 import qiskit
@@ -91,9 +92,7 @@ def pytket_compile(pytket_circuit):
     compilation_unit = CompilationUnit(pytket_circuit)
     seqpass = SequencePass(
         [
-            SimplifyInitial(),
-            DecomposeBoxes(),
-            RemoveRedundancies(),
+            FullPeepholeOptimise(),
             AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
         ]
     )
