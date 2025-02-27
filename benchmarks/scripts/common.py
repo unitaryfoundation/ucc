@@ -12,6 +12,7 @@ from pytket.passes import (
     SequencePass,
     AutoRebase,
     FullPeepholeOptimise,
+    KAKDecomposition,
 )
 from pytket.predicates import CompilationUnit
 import qiskit
@@ -61,6 +62,8 @@ def get_compile_function(compiler_alias):
             return ucc_compile
         case "pytket-peep":
             return pytket_peep_compile
+        case "pytket-kak":
+            return pytket_kak_compile
         case "qiskit":
             return qiskit_compile
         case "cirq":
@@ -78,7 +81,7 @@ def get_native_rep(qasm_string, compiler_alias):
     if compiler_alias == "ucc":
         # Qiskit used for UCC to get raw gate counts
         native_circuit = translate(qasm_string, "qiskit")
-    if compiler_alias == "pytket-peep":
+    if compiler_alias == "pytket-peep" or compiler_alias == "pytket-kak":
         native_circuit = translate(qasm_string, "pytket")
     else:
         native_circuit = translate(qasm_string, compiler_alias)
@@ -97,7 +100,17 @@ def pytket_peep_compile(pytket_circuit):
     return compilation_unit.circuit
 
 
-# Qiskit compilation
+# Uses KAKDecomposition
+def pytket_kak_compile(pytket_circuit):
+    compilation_unit = CompilationUnit(pytket_circuit)
+    passes = [
+        KAKDecomposition(),
+        AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
+    ]
+    SequencePass(passes).apply(compilation_unit)
+    return compilation_unit.circuit
+
+
 def qiskit_compile(qiskit_circuit):
     return qiskit_transpile(
         qiskit_circuit,
@@ -283,10 +296,10 @@ def count_multi_qubit_gates(circuit, compiler_alias):
             return count_multi_qubit_gates_qiskit(circuit)
         case "cirq":
             return count_multi_qubit_gates_cirq(circuit)
-        case "pytket-peep":
+        case "pytket-peep" | "pytket-kak":
             return count_multi_qubit_gates_pytket(circuit)
         case _:
-            return "Unknown compiler alias."
+            return "No known ."
 
 
 def get_header(df):
