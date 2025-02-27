@@ -78,13 +78,14 @@ def get_native_rep(qasm_string, compiler_alias):
         qasm_string: QASM string representing the circuit.
         compiler_alias: Alias of the compiler to be used for conversion.
     """
-    if compiler_alias == "ucc":
-        # Qiskit used for UCC to get raw gate counts
-        native_circuit = translate(qasm_string, "qiskit")
-    if compiler_alias == "pytket-peep" or compiler_alias == "pytket-kak":
-        native_circuit = translate(qasm_string, "pytket")
-    else:
-        native_circuit = translate(qasm_string, compiler_alias)
+    match compiler_alias:
+        case "ucc":
+            # Qiskit used for UCC to get raw gate counts
+            native_circuit = translate(qasm_string, "qiskit")
+        case "pytket-peep" | "pytket-kak":
+            native_circuit = translate(qasm_string, "pytket")
+        case _:
+            native_circuit = translate(qasm_string, compiler_alias)
 
     return native_circuit
 
