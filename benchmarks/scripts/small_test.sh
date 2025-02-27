@@ -1,5 +1,5 @@
 QASM_FILE="qasm2/ucc/qcnn_N100_7layers_basis_rz_rx_ry_h_cx.qasm"
-COMPILER="ucc"
+COMPILER="pytket-peep"
 
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 RESULTS_FOLDER="$SCRIPT_DIR/../results/test_data"

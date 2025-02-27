@@ -12,7 +12,6 @@ from pytket.passes import (
     SequencePass,
     AutoRebase,
     FullPeepholeOptimise,
-    KAKDecomposition,
 )
 from pytket.predicates import CompilationUnit
 import qiskit
@@ -60,8 +59,8 @@ def get_compile_function(compiler_alias):
     match compiler_alias:
         case "ucc":
             return ucc_compile
-        case "pytket":
-            return pytket_compile
+        case "pytket-peep":
+            return pytket_peep_compile
         case "qiskit":
             return qiskit_compile
         case "cirq":
@@ -79,26 +78,21 @@ def get_native_rep(qasm_string, compiler_alias):
     if compiler_alias == "ucc":
         # Qiskit used for UCC to get raw gate counts
         native_circuit = translate(qasm_string, "qiskit")
+    if compiler_alias == "pytket-peep":
+        native_circuit = translate(qasm_string, "pytket")
     else:
         native_circuit = translate(qasm_string, compiler_alias)
 
     return native_circuit
 
 
-# PyTkets compilation
-def pytket_compile(pytket_circuit, method="peephole"):
+# Uses FullPeepholeOptimise
+def pytket_peep_compile(pytket_circuit):
     compilation_unit = CompilationUnit(pytket_circuit)
-    if method == "peephole":
-        passes = [FullPeepholeOptimise()]
-    elif method == "kak":
-        passes = [KAKDecomposition()]
-    else:
-        raise ValueError("Invalid compilation method for PyTKET.")
-
-    passes.append(
-        AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H})
-    )
-
+    passes = [
+        FullPeepholeOptimise(),
+        AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
+    ]
     SequencePass(passes).apply(compilation_unit)
     return compilation_unit.circuit
 
@@ -289,7 +283,7 @@ def count_multi_qubit_gates(circuit, compiler_alias):
             return count_multi_qubit_gates_qiskit(circuit)
         case "cirq":
             return count_multi_qubit_gates_cirq(circuit)
-        case "pytket":
+        case "pytket-peep":
             return count_multi_qubit_gates_pytket(circuit)
         case _:
             return "Unknown compiler alias."

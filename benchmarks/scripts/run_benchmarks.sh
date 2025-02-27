@@ -23,7 +23,7 @@ QASM_FILES=(
 )
 
 # Define your list of compilers
-COMPILERS=("ucc" "qiskit" "pytket" "cirq")
+COMPILERS=("ucc" "qiskit" "pytket-peep" "pytket-kak" "cirq")
 
 # Default parallelism 4 (can be overridden by a command line argument)
 PARALLELISM="${1:-4}"
@@ -38,7 +38,7 @@ for qasm_file in "${QASM_FILES[@]}"; do
     for compiler in "${COMPILERS[@]}"; do
         # Combine the common folder path with the QASM file
         full_qasm_file="${QASM_FOLDER}${qasm_file}"
-        
+
         # Build the command, passing the results folder as an argument
         command="python3 $(dirname "$0")/benchmark_script.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\""
 
@@ -59,7 +59,7 @@ for qasm_file in "${QASM_EXPVAL_FILES[@]}"; do
     for compiler in "${COMPILERS[@]}"; do
         # Combine the common folder path with the QASM file
         full_qasm_file="${QASM_FOLDER}${qasm_file}"
-        
+
         # Build the command, passing the results folder as an argument
         command="poetry run python $(dirname "$0")/expval_benchmark.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\" $LOG_EXPVAL"
 
