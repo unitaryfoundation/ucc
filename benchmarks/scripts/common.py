@@ -8,7 +8,12 @@ from typing import List
 from cirq import optimize_for_target_gateset
 import cirq
 from pytket.circuit import OpType
-from pytket.passes import SequencePass, AutoRebase, FullPeepholeOptimise
+from pytket.passes import (
+    SequencePass,
+    AutoRebase,
+    FullPeepholeOptimise,
+    KAKDecomposition,
+)
 from pytket.predicates import CompilationUnit
 import qiskit
 from qiskit_aer.noise import NoiseModel, depolarizing_error
@@ -81,15 +86,20 @@ def get_native_rep(qasm_string, compiler_alias):
 
 
 # PyTkets compilation
-def pytket_compile(pytket_circuit):
+def pytket_compile(pytket_circuit, method="peephole"):
     compilation_unit = CompilationUnit(pytket_circuit)
-    seqpass = SequencePass(
-        [
-            FullPeepholeOptimise(),
-            AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
-        ]
+    if method == "peephole":
+        passes = [FullPeepholeOptimise()]
+    elif method == "kak":
+        passes = [KAKDecomposition()]
+    else:
+        raise ValueError("Invalid compilation method for PyTKET.")
+
+    passes.append(
+        AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H})
     )
-    seqpass.apply(compilation_unit)
+
+    SequencePass(passes).apply(compilation_unit)
     return compilation_unit.circuit
 
 
