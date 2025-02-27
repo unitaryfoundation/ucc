@@ -27,7 +27,7 @@ CONFIG = user_config.get_config()
 
 
 class UCCDefault1:
-    def __init__(self, local_iterations=1):
+    def __init__(self, local_iterations=1, coupling_list=None):
         self.pass_manager = PassManager()
         self._1q_basis = ["rz", "rx", "ry", "h"]
         self._2q_basis = ["cx"]
@@ -43,6 +43,10 @@ class UCCDefault1:
             },
         }
         self.add_local_passes(local_iterations)
+        self.add_map_passes(coupling_list)
+        self.pass_manager.append(
+            BasisTranslator(sel, target_basis=self.target_basis)
+        )
 
     @property
     def default_passes(self):
@@ -103,13 +107,8 @@ class UCCDefault1:
             self.pass_manager.append(VF2PostLayout(coupling_map=coupling_map))
             self.pass_manager.append(ApplyLayout())
 
-    def run(self, circuits, coupling_list=None):
-        self.add_map_passes(coupling_list)
-        self.pass_manager.append(
-            BasisTranslator(sel, target_basis=self.target_basis)
-        )
-        out_circuits = self.pass_manager.run(circuits)
-        return out_circuits
+    def run(self, circuits):
+        return self.pass_manager.run(circuits)
 
 
 def _get_trial_count(default_trials=5):

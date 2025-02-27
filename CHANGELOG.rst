@@ -1,6 +1,66 @@
 Changelog
 =========
 
+[0.4.3] - 2025-02-26
+--------------------
+
+In version 0.4.3, we enhanced UCC infrastructure, benchmarking, and documentation.
+Release highlights include the introduction of 
+[Poetry](https://github.com/python-poetry/install.python-poetry.org) for dependency management,
+the automated display of results from benchmarks run on the `main` branch,
+and plotting of expectation value benchmark results. 
+In the case of quantum volume circuits, we changed the expectation value metric from the default
+ZZZZZZZZZZZ observable to the heavy output probability.
+
+
+Added
+^^^^^^^^^^^^^^^^^^^^^
+
+- Mention benchpress explicitly in License section. #241 [@jordandsullivan]
+- Add target gate set for cirq benchmarking #224 [@bachase]
+- Add ruff for linting and formating #216 [@bachase]
+- Added warnings to top level compile function for trying to import non-supported python versions #185 [@jordandsullivan]
+- Add explicit Sphinx config in .readthedocs.yaml file #180 [@Misty-W]
+
+
+Fixed
+^^^^^^^^^^^^^^^^^^^^^
+
+- Ensure benchmarking runs don't add gitignored files #247 [@bachase]
+- Pull latest compatible version of libraries when generating benchmark docker #244 [@bachase]
+- Fix broken links in docs #240 [@bachase]
+- Fix spelling mistake #237 [@natestemen]
+- Fix relative path bug in expval benchmarking script #231 [@natestemen]
+- Fix typo in readme for supported formats #230 [@bachase]
+- Fix benchmark script to work with poetry #214 [@bachase]
+- Combine recent data files w/ incomplete benchmarks #207 [@Misty-W]
+
+
+Changed
+^^^^^^^^^^^^^^^^^^^^^
+
+- Run pytest before ruff linter checks #267 [@jordandsullivan]
+- Clarify poetry usage #265 [@bachase]
+- Update Install Poetry link to instructions for installation #257 [@jordandsullivan]
+- Upgrade dependencies #250 [@bachase]
+- Change QV error rates back to global variables #248 [@Misty-W]
+- Update documentation to expand on design goals: #245 [@bachase]
+- Change expectation value metric to HOP for QV circuits #223 [@Misty-W]
+- Switch to poetry for dependency management #208 [@bachase]
+- Test run benchmarks with simple wording change #205 [@Misty-W]
+- Wording #198 [@jordandsullivan]
+- Test deploy key push access #197 [@jordandsullivan]
+- Plot adjustments #183 by jordandsullivan
+- Minor docs updates #181 by Misty-W
+- Update README.md #178 by willzeng
+
+
+Removed
+^^^^^^^^^^^^^^^^^^^^^
+
+- Remove custom transpilation passes #256 [@bachase]
+
+
 [0.4.2] - 2025-01-17
 --------------------
 
@@ -9,7 +69,9 @@ Version 0.4.2 marks the first formal release to [PyPI](https://pypi.org/project/
 This release contains the default UCC compilation workflow, including circuit translation and optimization passes, pass management, and the user interface.
 It also encompasses benchmarking scripts and utilities, tests, documentation, and basic infrastructure.
 
-### Added
+Added
+^^^^^^^^^^^^^^^^^^^^^
+
 - PyPI release #165 [@Misty-W]
 - Add RTD for online documentation #164 [@natestemen]
 - Create contribution guide #157 [@natestemen]
@@ -54,7 +116,9 @@ It also encompasses benchmarking scripts and utilities, tests, documentation, an
 - Choose a license #1 [@jordandsullivan]
 
 
-### Fixed
+Fixed
+^^^^^^^^^^^^^^^^^^^^^
+
 - Install error due to openqasm versioning #154 [@Misty-W]
 - fix small_test.sh CLI command to deal with spaces in paths #152 [@willzeng]
 - Mismatched headers in datafiles #148 [@jordandsullivan]
@@ -68,6 +132,8 @@ It also encompasses benchmarking scripts and utilities, tests, documentation, an
 - Hidden rust dependency on install #74 [@Misty-W]
 
 
-### Removed
+Removed
+^^^^^^^^^^^^^^^^^^^^^
+
 - Remove innaccurate data for multi-q gates #86 [@jordandsullivan]
 - Remove QuantumTranslator references #23 [@jordandsullivan]

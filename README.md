@@ -27,13 +27,16 @@ By leveraging [qBraid](https://github.com/qBraid/qBraid), UCC interfaces automat
 pip install ucc
 ```
 
-If developing or running benchmark, please install [Poetry](https://github.com/python-poetry/install.python-poetry.org), then setup a dev version:
+If developing or running benchmarks, please install [Poetry](https://github.com/python-poetry/install.python-poetry.org), which is used to managed dependencies. Then setup a dev version via:
 
 ```bash
 git clone https://github.com/unitaryfund/ucc.git
 cd ucc
 poetry install
 ```
+For any subsequent commands mentioned in the docs, we assume you either prefix each command with `poetry run`, or
+you first activate the [poetry managed virtual environment](https://python-poetry.org/docs/managing-environments/#activating-the-environment>) by running the output of `poetry env activate` in your shell.
+
 
 ### Example with Qiskit, Cirq, and PyTKET
 

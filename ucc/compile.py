@@ -50,9 +50,10 @@ def compile(
 
     # Translate to Qiskit Circuit object
     qiskit_circuit = transpile(circuit, "qiskit")
-    compiled_circuit = UCCDefault1().run(
+    compiled_circuit = UCCDefault1(
+        coupling_list=get_backend_connectivity(target_device)
+    ).run(
         qiskit_circuit,
-        coupling_list=get_backend_connectivity(target_device),
     )
 
     # Translate the compiled circuit to the desired format

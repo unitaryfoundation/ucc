@@ -22,8 +22,10 @@ After installing poetry, run the following commands to clone the repository, cre
     cd ucc
     poetry install
 
-For all of the following commands, either first run ``poetry shell`` to enable the poetry managed virtual environment,
-or prefix each command with ``poetry run``.
+For all of the following commands, we assume you either prefix each command with ``poetry run``, or
+you first active the `poetry managed virtual environment <https://python-poetry.org/docs/managing-environments/#activating-the-environment>`_ by running the output of ``poetry env activate`` in your shell.
+
+To run the unit tests, you can use the following command
 
 .. code:: bash
 
@@ -36,6 +38,14 @@ and build the documentation by changing to the ``docs/source`` directory where y
     make html
 
 The built documentation will then live in ``ucc/docs/source/_build/html``.
+
+To test that code examples in the documentation work as expected, you can run
+
+.. code:: bash
+
+    make doctest
+
+This leverages Sphinx `doctest extension <https://www.sphinx-doc.org/en/master/usage/extensions/doctest.html>`_ .
 
 We also use `pre-commit <https://pre-commit.com/>`_ to run code formatting and linting checks before each commit.
 To enable the pre-commit hooks, run

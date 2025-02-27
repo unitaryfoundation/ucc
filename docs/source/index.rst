@@ -14,7 +14,6 @@ Welcome to the docs!
    :caption: Contents:
 
    User Guide <user_guide.rst>
-   API-doc <api.rst>
    Contributing Guide <contributing.rst>
    Benchmarking <benchmarking.rst>
    Developer Documentation <dev.rst>
