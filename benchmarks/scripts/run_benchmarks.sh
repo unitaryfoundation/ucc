@@ -23,7 +23,7 @@ QASM_FILES=(
 )
 
 # Define your list of compilers
-COMPILERS=("ucc" "qiskit" "pytket-peep" "pytket-kak" "cirq")
+COMPILERS=("ucc" "qiskit" "pytket-peep" "cirq")
 
 # Default parallelism 4 (can be overridden by a command line argument)
 PARALLELISM="${1:-4}"

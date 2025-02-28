@@ -78,7 +78,7 @@ def get_native_rep(qasm_string, compiler_alias):
     if compiler_alias == "ucc":
         # Qiskit used for UCC to get raw gate counts
         native_circuit = translate(qasm_string, "qiskit")
-    if compiler_alias == "pytket-peep":
+    elif compiler_alias == "pytket-peep":
         native_circuit = translate(qasm_string, "pytket")
     else:
         native_circuit = translate(qasm_string, compiler_alias)

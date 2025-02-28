@@ -23,18 +23,28 @@ def extract_compiler_versions(header):
 
 print("Loading data files...")
 for file in csv_files:
+    compiler_versions = {}
     with open(file, "r") as f:
         header_line = f.readline().strip()
         compiler_versions = extract_compiler_versions(header_line)
+
     date_label = str(file).split("_")[1].split(".")[0]
     df = pd.read_csv(file, header=1)
+
     df["date"] = date_label
     df["compiled_ratio"] = df["compiled_multiq_gates"] / df["raw_multiq_gates"]
+    if "pytket-peep" in df["compiler"].unique():
+        compiler_versions["pytket-peep"] = compiler_versions["pytket"]
+        # Remove pytket from compiler_versions for this datafile
+        compiler_versions.pop("pytket")
     df["compiler_version"] = df["compiler"].map(compiler_versions)
 
     dataframes.append(df)
 
 df_dates = pd.concat(dataframes, ignore_index=True)
+
+# Remove older implementation of pytket from the data
+df_dates = df_dates[df_dates["compiler"] != "pytket"]
 
 # Find the average compiled ratio for each compiler on each date
 avg_compiled_ratio = (
@@ -92,7 +102,6 @@ for date in avg_compiled_ratio["date"].unique():
     date_data = avg_compiled_ratio[avg_compiled_ratio["date"] == date]
     # Sort date_data in order of compiled_ratio
     date_data = date_data.sort_values("compiled_ratio")
-    # print('Date data for \n', date, date_data, '\n')
     # Now iterate over each compiler entry and annotate if it's a new version
     for _, row in date_data.iterrows():
         # Get the version for this date
@@ -121,7 +130,7 @@ for date in avg_compiled_ratio["date"].unique():
             # Update the last seen version for this compiler
             last_version_seen[compiler] = current_version
     # previous_bboxes = [] # Reset previous bboxes for next date
-adjust_axes_to_fit_labels(ax[0], x_scale=1.01, y_scale=1.05)
+adjust_axes_to_fit_labels(ax[0], x_scale=1.01, y_scale=1.3)
 # Set y axis range to be slightly larger than data range
 
 ax[0].set_title("Average Compiled Ratio over Time")
@@ -188,7 +197,7 @@ ax[1].set_ylabel("Compile Time (s)")
 ax[1].set_xlabel("Date")
 ax[1].set_yscale("log")
 ax[1].legend(title="Compiler")
-adjust_axes_to_fit_labels(ax[1], x_scale=1.01, y_scale=1.75, y_log=True)
+adjust_axes_to_fit_labels(ax[1], x_scale=1.01, y_scale=1.9, y_log=True)
 
 plt.xticks(rotation=45)
 plt.tight_layout()

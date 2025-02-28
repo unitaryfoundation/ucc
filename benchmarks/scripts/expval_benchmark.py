@@ -13,7 +13,7 @@ import numpy as np
 
 from common import (
     cirq_compile,
-    pytket_compile,
+    pytket_peep_compile,
     qiskit_compile,
     save_results,
     get_native_rep,
@@ -46,13 +46,13 @@ def compile_for_simulation(
             ucc_compiled.save_density_matrix()
             return ucc_compiled
 
-        case "pytket":
-            pytket_compiled = pytket.qasm.circuit_to_qasm_str(
-                pytket_compile(circuit)
+        case "pytket-peep":
+            pytket_peep_compiled = pytket.qasm.circuit_to_qasm_str(
+                pytket_peep_compile(circuit)
             )
-            pytket_compiled_qiskit = qasm2.loads(pytket_compiled)
-            pytket_compiled_qiskit.save_density_matrix()
-            return pytket_compiled_qiskit
+            pytket_peep_compiled_qiskit = qasm2.loads(pytket_peep_compiled)
+            pytket_peep_compiled_qiskit.save_density_matrix()
+            return pytket_peep_compiled_qiskit
 
         case "qiskit":
             qiskit_compiled = qiskit_compile(circuit)
