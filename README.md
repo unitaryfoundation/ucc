@@ -73,7 +73,8 @@ def test_cirq_compile():
 <!-- comment used to strip this section from being added to the docs build-->
 ## How does UCC stack up?
 
-UCC seeks to provide an end-to-end compiler that works well for the majority of the users out of the box. Today, this is achieved by building on and customizing [Qiskit](https://github.com/Qiskit/qiskit) transpiler passes. To ensure these customizations improve performance and meet user needs, we regularly run benchmarks comparing UCC against the latest versions of leading quantum compiler frameworks across a range of circuits. Here’s the latest:
+UCC seeks to provide an end-to-end compiler that works well for the majority of the users out of the box. Today, this is achieved by running a particular subset of [Qiskit](https://github.com/Qiskit/qiskit) transpiler passes. 
+To ensure we continue to improve performance and meet user needs, we regularly run benchmarks comparing UCC against the latest versions of leading quantum compiler frameworks across a range of circuits. Here’s the latest:
 ![alt text](benchmarks/latest_compiler_benchmarks_by_circuit.png)
 
 In addition to raw compilation stats, we simulate the compiled circuits with a noisy density matrix simulation to see how each compiler impacts performance.
@@ -104,4 +105,4 @@ If you have questions about contributing please ask on the [Unitary Foundation D
 ## License
 
 UCC is distributed under [GNU Affero General Public License version 3.0](https://www.gnu.org/licenses/agpl-3.0.en.html)(AGPLv3).
-Parts of ucc contain code or modified code that is part of [Qiskit](https://github.com/Qiskit/qiskit) or [Qiskit Benchpress](https://github.com/Qiskit/benchpress), which are distributed under Apache 2.0 license.
+Parts of ucc contain code or modified code that is part of [Qiskit](https://github.com/Qiskit/qiskit) or [Qiskit Benchpress](https://github.com/Qiskit/benchpress), which are distributed under the Apache 2.0 license.
