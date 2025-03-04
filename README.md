@@ -79,7 +79,7 @@ To ensure we continue to improve performance and meet user needs, we regularly r
 
 And here you can see progress over time, with new package versions labeled for each compiler:
 ![alt text](benchmarks/avg_compiler_benchmarks_over_time.png)
-Note that the compile times before 2024-12-10 may have been run on different classical compute instances, so their runtime is not reported here, but you can find this data in benchmarks/results.
+where pytket-peep indicates the `FullPeepHoleOptimize` function of PyTKET. Note that the compile times before 2024-12-10 may have been run on different classical compute instances, so their runtime is not reported here, but you can find this data in benchmarks/results.
 After 2024-12-10, all data present in this plot is on the same compute instance using our [ucc-benchmarks](https://github.com/unitaryfund/ucc/blob/main/.github/workflows/ucc-benchmarks.yml) GitHub Actions workflow.
 
 To learn more about running these benchmarks, the overall benchmark philosophy, or how to contribute to improving the benchmarking methodology, check out the [benchmarking section](https://ucc.readthedocs.io/en/latest/benchmarking.html) in the docs.
