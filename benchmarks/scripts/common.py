@@ -40,6 +40,18 @@ def log_performance(
     t1 = time()
     compiled_circuit = compiler_function(raw_circuit)
     t2 = time()
+
+    if compiler_alias == "pytket-peep":
+        gate_counter = {}
+
+        for command in (
+            compiled_circuit.get_commands()
+        ):  # Use get_commands() to iterate through circuit operations
+            gate_name = command.op.get_name()
+            gate_counter[gate_name] = gate_counter.get(gate_name, 0) + 1
+
+        print(gate_counter)
+
     log_entry["compile_time"] = t2 - t1
     log_entry["compiled_multiq_gates"] = count_multi_qubit_gates(
         compiled_circuit, compiler_alias
@@ -90,8 +102,8 @@ def get_native_rep(qasm_string, compiler_alias):
 def pytket_peep_compile(pytket_circuit):
     compilation_unit = CompilationUnit(pytket_circuit)
     passes = [
-        FullPeepholeOptimise(),
         AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
+        FullPeepholeOptimise(),
     ]
     SequencePass(passes).apply(compilation_unit)
     return compilation_unit.circuit
