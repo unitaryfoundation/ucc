@@ -23,7 +23,7 @@ QASM_FILES=(
 )
 
 # Define your list of compilers
-COMPILERS=("ucc" "qiskit" "pytket" "cirq")
+COMPILERS=("pytket-peep")
 
 # Default parallelism 4 (can be overridden by a command line argument)
 PARALLELISM="${1:-4}"
@@ -50,27 +50,28 @@ done
 # that could impact timing results
 parallel -j "$PARALLELISM" ::: "${commands[@]}"
 
-QASM_EXPVAL_FILES=(
-    "benchpress/qaoa_barabasi_albert_N10_3reps_basis_rz_rx_ry_cx.qasm"
-    "benchpress/qv_N010_12345_basis_rz_rx_ry_cx.qasm"
-    "benchpress/qft_N010_basis_rz_rx_ry_cx.qasm"
-    "benchpress/square_heisenberg_N9_basis_rz_rx_ry_cx.qasm"
-    "ucc/prep_select_N10_ghz_basis_rz_rx_ry_h_cx.qasm"
-    "ucc/qcnn_N10_4layers_basis_rz_rx_ry_h_cx.qasm"
-)
-LOG_EXPVAL=false
-commands=()
-for qasm_file in "${QASM_EXPVAL_FILES[@]}"; do
-    for compiler in "${COMPILERS[@]}"; do
-        # Combine the common folder path with the QASM file
-        full_qasm_file="${QASM_FOLDER}${qasm_file}"
+# Not currently running expectation value benchmarks 
+# QASM_EXPVAL_FILES=(
+#     "benchpress/qaoa_barabasi_albert_N10_3reps_basis_rz_rx_ry_cx.qasm"
+#     "benchpress/qv_N010_12345_basis_rz_rx_ry_cx.qasm"
+#     "benchpress/qft_N010_basis_rz_rx_ry_cx.qasm"
+#     "benchpress/square_heisenberg_N9_basis_rz_rx_ry_cx.qasm"
+#     "ucc/prep_select_N10_ghz_basis_rz_rx_ry_h_cx.qasm"
+#     "ucc/qcnn_N10_4layers_basis_rz_rx_ry_h_cx.qasm"
+# )
+# LOG_EXPVAL=false
+# commands=()
+# for qasm_file in "${QASM_EXPVAL_FILES[@]}"; do
+#     for compiler in "${COMPILERS[@]}"; do
+#         # Combine the common folder path with the QASM file
+#         full_qasm_file="${QASM_FOLDER}${qasm_file}"
 
-        # Build the command, passing the results folder as an argument
-        command="poetry run python $(dirname "$0")/expval_benchmark.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\" $LOG_EXPVAL"
+#         # Build the command, passing the results folder as an argument
+#         command="poetry run python $(dirname "$0")/expval_benchmark.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\" $LOG_EXPVAL"
 
-        commands+=("$command")
-    done
-done
+#         commands+=("$command")
+#     done
+# done
 
-# Execute the expected value benchmarks in parallel up to the specified number of parallel jobs
-parallel -j "$PARALLELISM" ::: "${commands[@]}"
+# # Execute the expected value benchmarks in parallel up to the specified number of parallel jobs
+# parallel -j "$PARALLELISM" ::: "${commands[@]}"
