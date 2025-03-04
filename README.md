@@ -77,11 +77,6 @@ UCC seeks to provide an end-to-end compiler that works well for the majority of 
 To ensure we continue to improve performance and meet user needs, we regularly run benchmarks comparing UCC against the latest versions of leading quantum compiler frameworks across a range of circuits. Here’s the latest:
 ![alt text](benchmarks/latest_compiler_benchmarks_by_circuit.png)
 
-In addition to raw compilation stats, we simulate the compiled circuits with a noisy density matrix simulation to see how each compiler impacts performance.
-Here we plot the absolute errors $|\langle O\rangle_{C_i,\text{ideal}} - \langle O\rangle_{C_i,\text{noisy}}|$ for a collection of circuits $C_i$.
-
-![Violin plot showing absolute error of each compiler across a variety of circuits](benchmarks/latest_expval_benchmark_by_compiler.png)
-
 And here you can see progress over time, with new package versions labeled for each compiler:
 ![alt text](benchmarks/avg_compiler_benchmarks_over_time.png)
 Note that the compile times before 2024-12-10 may have been run on different classical compute instances, so their runtime is not reported here, but you can find this data in benchmarks/results.
