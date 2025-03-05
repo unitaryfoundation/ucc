@@ -34,7 +34,6 @@ For example, we can define a random circuit in Qiskit and optimize it using the 
 
    from qiskit.circuit.random import random_clifford_circuit
    import ucc
-   from benchmarks.scripts.common import count_multi_qubit_gates_qiskit
 
 
    gates = ["cx", "cz", "cy", "swap", "x", "y", "z", "s", "sdg", "h"]
@@ -43,8 +42,8 @@ For example, we can define a random circuit in Qiskit and optimize it using the 
        num_qubits, gates=gates, num_gates=10 * num_qubits * num_qubits
    )
    compiled_circuit = ucc.compile(raw_circuit)
-   print(f"Number of multi-qubit gates in original circuit: {count_multi_qubit_gates_qiskit(raw_circuit)}")
-   print(f"Number of multi-qubit gates in compiled circuit: {count_multi_qubit_gates_qiskit(compiled_circuit)}")
+   print(f"Number of multi-qubit gates in original circuit: {raw_circuit.num_nonlocal_gates()}")
+   print(f"Number of multi-qubit gates in compiled circuit: {compiled_circuit.num_nonlocal_gates()}")
 
 .. testoutput::
    :hide:
