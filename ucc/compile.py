@@ -1,5 +1,3 @@
-from qiskit.providers import BackendV2
-from qiskit.transpiler import CouplingMap
 from qbraid.programs.alias_manager import get_program_type_alias
 from qbraid.transpiler import ConversionGraph
 from qbraid.transpiler import transpile
@@ -41,6 +39,7 @@ def compile(
         return_format (str): The format in which your circuit will be returned.
             e.g., "TKET", "OpenQASM2". Check ``ucc.supported_circuit_formats()``.
             Defaults to the format of the input circuit.
+        target_device (qiskit.transpiler.Target): (optional) The target device to compile the circuit for. None if no device to target
 
     Returns:
         object: The compiled circuit in the specified format.
@@ -50,43 +49,10 @@ def compile(
 
     # Translate to Qiskit Circuit object
     qiskit_circuit = transpile(circuit, "qiskit")
-    compiled_circuit = UCCDefault1(
-        coupling_list=get_backend_connectivity(target_device)
-    ).run(
+    compiled_circuit = UCCDefault1(target_device=target_device).run(
         qiskit_circuit,
     )
 
     # Translate the compiled circuit to the desired format
     final_result = transpile(compiled_circuit, return_format)
     return final_result
-
-
-def get_backend_connectivity(target_device=None) -> str:
-    """
-    Extracts the coupling graph from the provided device in the form of a list of connections between qubits.
-
-    Parameters:
-        target_device: Can be a Qiskit backend or Qiskit CouplingMap, or a list of connections between qubits.
-                    If None, all-to-all connectivity is assumed.
-                    If Qiskit backend or coupling map, only the coupling list extracted from the backend is used.
-
-    Returns:
-        coupling_list: The list of connections between qubits.
-    """
-
-    if target_device is None:
-        coupling_list = None
-    elif isinstance(target_device, BackendV2):
-        coupling_list = list(target_device.coupling_map.get_edges())
-    elif isinstance(target_device, CouplingMap):
-        # rustworkx.EdgeList object
-        coupling_list = target_device.get_edges()
-    elif isinstance(target_device, list):
-        # user-specified list of edges of coupling graph
-        coupling_list = target_device
-    else:
-        raise ValueError(
-            "Invalid backend type. Must be a Qiskit backend, coupling map, or a list of connections between qubits."
-        )
-
-    return coupling_list

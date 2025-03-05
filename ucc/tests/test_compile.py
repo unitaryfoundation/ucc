@@ -7,7 +7,9 @@ from qiskit import QuantumCircuit as QiskitCircuit
 from qiskit.converters import circuit_to_dag
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler.passes import GatesInBasis
-
+from qiskit.transpiler.passes.utils import CheckMap
+from qiskit.transpiler import Target
+from qiskit.circuit.library import CXGate
 from benchmarks.scripts import qcnn_circuit, random_clifford_circuit
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
@@ -34,6 +36,27 @@ def test_tket_compile():
     circuit.CX(0, 1)
     result_circuit = compile(circuit, return_format="original")
     assert isinstance(result_circuit, TketCircuit)
+
+
+def test_compile_with_target_device():
+    circuit = QiskitCircuit(3)
+    circuit.cx(0, 1)
+    circuit.cx(0, 2)
+
+    # Create a simple target that does not have direct CX between 0 and 2
+    t = Target(description="Fake device", num_qubits=3)
+    t.add_instruction(CXGate(), {(0, 1): None, (1, 2): None})
+    result_circuit = compile(
+        circuit, return_format="original", target_device=t
+    )
+
+    # Check compilation respected the target device topology
+    dag = circuit_to_dag(result_circuit)
+    analysis_pass = CheckMap(
+        t.build_coupling_map(), property_set_field="check_map"
+    )
+    analysis_pass.run(dag)
+    assert analysis_pass.property_set["check_map"]
 
 
 @pytest.mark.parametrize(
