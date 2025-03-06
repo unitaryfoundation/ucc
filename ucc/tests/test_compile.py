@@ -1,7 +1,7 @@
 import pytest
-from cirq import CNOT
+from cirq import CNOT, H, X, LineQubit, NamedQubit
 from cirq import Circuit as CirqCircuit
-from cirq import H, LineQubit
+from cirq.testing import assert_same_circuits
 from pytket import Circuit as TketCircuit
 from qiskit import QuantumCircuit as QiskitCircuit
 from qiskit.converters import circuit_to_dag
@@ -10,6 +10,9 @@ from qiskit.transpiler.passes import GatesInBasis
 from qiskit.transpiler.passes.utils import CheckMap
 from qiskit.transpiler import Target
 from qiskit.circuit.library import CXGate
+from qiskit.transpiler import PassManager
+from qiskit.transpiler.basepasses import TransformationPass
+from qiskit.circuit.library import HGate, XGate
 from benchmarks.scripts import qcnn_circuit, random_clifford_circuit
 from ucc import compile
 from ucc.transpilers.ucc_defaults import UCCDefault1
@@ -46,8 +49,9 @@ def test_compile_with_target_device():
     # Create a simple target that does not have direct CX between 0 and 2
     t = Target(description="Fake device", num_qubits=3)
     t.add_instruction(CXGate(), {(0, 1): None, (1, 2): None})
+    compiler = UCCDefault1(target_device=t)
     result_circuit = compile(
-        circuit, return_format="original", target_device=t
+        circuit, return_format="original", compiler=compiler
     )
 
     # Check compilation respected the target device topology
@@ -57,6 +61,30 @@ def test_compile_with_target_device():
     )
     analysis_pass.run(dag)
     assert analysis_pass.property_set["check_map"]
+
+
+def test_custom_pass():
+    """Verify that a custom pass works with a non-qiskit input circuit"""
+
+    class HtoX(TransformationPass):
+        """Toy transformation that converts all H gates to X gates"""
+
+        def run(self, dag):
+            for node in dag.op_nodes():
+                if not isinstance(node.op, HGate):
+                    continue
+                dag.substitute_node(node, XGate())
+            return dag
+
+    # Example usage with a cirq circuit, stil showcasing the cross-frontend compatibility
+
+    qubit = NamedQubit("q_0")
+    cirq_circuit = CirqCircuit(H(qubit))
+    my_compiler = UCCDefault1()
+    my_compiler.pass_manager = PassManager()
+    my_compiler.pass_manager.append(HtoX())
+    post_compiler_circuit = compile(cirq_circuit, compiler=my_compiler)
+    assert_same_circuits(post_compiler_circuit, CirqCircuit(X(qubit)))
 
 
 @pytest.mark.parametrize(

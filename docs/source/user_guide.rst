@@ -89,12 +89,12 @@ UCC settings can be adjusted using the keyword arguments of the ``ucc.compile()`
    ucc.compile(
        circuit,
        return_format="original",
-       target_device=None,
+       compiler=None,
    )
 
 
 - ``return_format`` is the format in which the input circuit will be returned, e.g. "TKET" or "OpenQASM2". Check ``ucc.supported_circuit_formats()`` for supported circuit formats. Default is the format of input circuit.
-- ``target_device`` can be specified as a Qiskit backend or coupling map, or a list of connections between qubits. If None, all-to-all connectivity is assumed. If a Qiskit backend or coupling map is specified, only the coupling list extracted from the backend is used.
+- ``compiler`` is an instance of a custom compiler object to manage compiler passes. Default is ``UCCDefault1``.
 
 Writing a custom pass
 =====================
@@ -139,7 +139,7 @@ In the following example we show how to add passes for merging single qubit rota
 
    from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
    from qiskit.transpiler.passes import BasisTranslator, Optimize1qGatesSimpleCommutation
-   from ucc import UCCDefault1
+   from ucc import UCCDefault1, compile
 
 
    single_q_basis = ['rz', 'rx', 'ry', 'h']
@@ -149,19 +149,19 @@ In the following example we show how to add passes for merging single qubit rota
    ucc_compiler.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=single_q_basis))
    ucc_compiler.pass_manager.append(BasisTranslator(sel, target_basis=target_basis))
 
-   custom_compiled_circuit = ucc_compiler.run(circuit_to_compile)
+   custom_compiled_circuit = compile(circuit_to_compile, compiler = ucc_compiler)
 
 
 Alternatively, we can add a custom pass in the sequence, as shown in the following example.
 
 .. testcode:: custom_pass
 
-   from ucc import UCCDefault1
+   from ucc import UCCDefault1, compile
    ucc_compiler = UCCDefault1()
 
    ucc_compiler.pass_manager.append(MyCustomPass())
 
-   custom_compiled_circuit = ucc_compiler.run(circuit_to_compile)
+   custom_compiled_circuit = compile(circuit_to_compile, compiler = ucc_compiler)
 
 
 A note on terminology
