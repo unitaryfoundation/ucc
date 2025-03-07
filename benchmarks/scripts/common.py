@@ -223,7 +223,7 @@ def bqskit_compile(bqskit_circuit):
         workflow = build_workflow(
             bqskit_circuit,
             model=MachineModel(bqskit_circuit.num_qudits, gate_set=gate_set),
-            optimization_level=1,
+            optimization_level=2,
         )
         return c.compile(bqskit_circuit, workflow=workflow)
 

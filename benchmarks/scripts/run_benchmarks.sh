@@ -4,7 +4,7 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
 # Define the results folder path
-RESULTS_FOLDER="$SCRIPT_DIR/../results"
+RESULTS_FOLDER="$SCRIPT_DIR/../results.local"
 
 # Ensure the results folder exists
 mkdir -p "$RESULTS_FOLDER"
