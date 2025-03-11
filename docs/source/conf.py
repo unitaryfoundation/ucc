@@ -17,7 +17,12 @@ release = __version__
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.napoleon", "sphinx.ext.autodoc", "myst_parser"]
+extensions = [
+    "sphinx.ext.napoleon",
+    "sphinx.ext.autodoc",
+    "myst_parser",
+    "sphinx.ext.doctest",
+]
 # Suppress warnings related to heading levels
 suppress_warnings = ["myst.header"]
 

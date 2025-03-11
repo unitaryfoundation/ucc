@@ -7,13 +7,13 @@ import cirq
 import pytket
 import qiskit
 from qiskit import qasm2
-from qiskit.quantum_info import Operator, Statevector
+from qiskit.quantum_info import Operator, Statevector, SparsePauliOp
 from qiskit_aer import AerSimulator
 import numpy as np
 
 from common import (
     cirq_compile,
-    pytket_compile,
+    pytket_peep_compile,
     qiskit_compile,
     save_results,
     get_native_rep,
@@ -46,13 +46,13 @@ def compile_for_simulation(
             ucc_compiled.save_density_matrix()
             return ucc_compiled
 
-        case "pytket":
-            pytket_compiled = pytket.qasm.circuit_to_qasm_str(
-                pytket_compile(circuit)
+        case "pytket-peep":
+            pytket_peep_compiled = pytket.qasm.circuit_to_qasm_str(
+                pytket_peep_compile(circuit)
             )
-            pytket_compiled_qiskit = qasm2.loads(pytket_compiled)
-            pytket_compiled_qiskit.save_density_matrix()
-            return pytket_compiled_qiskit
+            pytket_peep_compiled_qiskit = qasm2.loads(pytket_peep_compiled)
+            pytket_peep_compiled_qiskit.save_density_matrix()
+            return pytket_peep_compiled_qiskit
 
         case "qiskit":
             qiskit_compiled = qiskit_compile(circuit)
@@ -83,7 +83,9 @@ def simulate_density_matrix(circuit: qiskit.QuantumCircuit) -> np.ndarray:
         circuit, SINGLE_QUBIT_ERROR_RATE, TWO_QUBIT_ERROR_RATE
     )
     simulator = AerSimulator(
-        method="density_matrix", noise_model=depolarizing_noise
+        method="density_matrix",
+        noise_model=depolarizing_noise,
+        max_parallel_threads=1,
     )
     return simulator.run(circuit).result().data()["density_matrix"]
 
@@ -161,7 +163,7 @@ def fetch_pre_post_compiled_circuits(
 
 def get_heavy_bitstrings(circuit: qiskit.QuantumCircuit) -> Set[str]:
     """ "Determine the heavy bitstrings of the circuit."""
-    simulator = AerSimulator(method="statevector")
+    simulator = AerSimulator(method="statevector", max_parallel_threads=1)
     result = simulator.run(circuit, shots=1024).result()
     counts = list(result.get_counts().items())
     median = np.median([c for (_, c) in counts])
@@ -190,11 +192,10 @@ def estimate_heavy_output_prob(
             noise_model=create_depolarizing_noise_model(
                 circuit, SINGLE_QUBIT_ERROR_RATE, TWO_QUBIT_ERROR_RATE
             ),
+            max_parallel_threads=1,
         )
     else:
-        simulator = AerSimulator(
-            method="statevector",
-        )
+        simulator = AerSimulator(method="statevector", max_parallel_threads=1)
     result = simulator.run(circuit).result()
 
     heavy_counts = sum(
@@ -205,6 +206,57 @@ def estimate_heavy_output_prob(
         heavy_counts - 2 * math.sqrt(heavy_counts * (nshots - heavy_counts))
     ) / nshots
     return hop
+
+
+def generate_qaoa_observable(num_qubits):
+    """Generates the problem Hamiltonian as the observable for the QAOA
+    benchmarking circuits, based on the binary encoding described in
+    Franz G. Fuchs, Herman Øie Kolden, Niels Henrik Aase, and Giorgio
+    Sartor "Efficient encoding of the weighted MAX k-CUT on a quantum computer
+    using QAOA". (2020) arXiv 2009.01095 (https://arxiv.org/abs/2009.01095).
+    The weights of the edges between vertices and of the resulting unitary
+    evolution come from the 10-vertex Barabasi-Albert graph in Fig 4(c)
+    of the paper.
+    """
+    pauli_strings = []
+    # Weights of edges between vertices and of the resulting unitary evolution
+    weighted_edges = [
+        (0, 1, 6.720),
+        (0, 2, 3.246),
+        (1, 2, 6.462),
+        (1, 3, 3.386),
+        (1, 5, 5.014),
+        (1, 6, 6.596),
+        (2, 3, 8.579),
+        (2, 4, 0.62),
+        (2, 5, 0.708),
+        (2, 6, 2.275),
+        (2, 7, 5.0),
+        (2, 8, 4.034),
+        (3, 4, 4.987),
+        (3, 6, 1.089),
+        (3, 9, 2.961),
+        (4, 5, 1.134),
+        (4, 6, 6.865),
+        (5, 6, 8.184),
+        (5, 7, 9.459),
+        (6, 7, 2.268),
+        (6, 8, 8.197),
+        (6, 9, 1.212),
+        (7, 9, 4.265),
+        (8, 9, 1.690),
+    ]
+    for i, j, _ in weighted_edges:
+        # Start with identity string
+        pauli_string = ["I"] * num_qubits
+        # Place Z operators on the chosen qubits
+        pauli_string[i] = "Z"
+        pauli_string[j] = "Z"
+        # Convert to PauliSumOp
+        pauli_strings.append("".join(pauli_string))
+    coeffs = [weight for _, _, weight in weighted_edges]
+    observable = SparsePauliOp(pauli_strings, coeffs)
+    return observable
 
 
 def simulate_expvals(
@@ -235,8 +287,15 @@ def simulate_expvals(
 
     else:
         density_matrix = simulate_density_matrix(compiled_circuit)
-        obs_str = "Z" * compiled.num_qubits
-        observable = Operator.from_label(obs_str)
+        if circuit_name == "qaoa_barabasi_albert":
+            # observable is the problem Hamiltonian
+            num_qubits = compiled_circuit.num_qubits
+            observable = generate_qaoa_observable(num_qubits)
+            obs_str = "".join(("H_p = ", str(observable.to_sparse_list())))
+
+        else:
+            obs_str = "Z" * compiled_circuit.num_qubits
+            observable = Operator.from_label(obs_str)
 
         compiled_ev = np.real(density_matrix.expectation_value(observable))
 

@@ -4,7 +4,7 @@ from qiskit.utils.parallel import CPU_COUNT
 from qiskit.transpiler import PassManager
 from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
 from qiskit import user_config
-from qiskit.transpiler import CouplingMap
+from qiskit.transpiler import Target
 from qiskit.transpiler.passes import (
     ApplyLayout,
     BasisTranslator,
@@ -21,13 +21,23 @@ from qiskit.transpiler.passes import (
     Optimize1qGatesDecomposition,
     VF2PostLayout,
 )
+from typing import Optional
 
 
 CONFIG = user_config.get_config()
 
 
 class UCCDefault1:
-    def __init__(self, local_iterations=1):
+    def __init__(
+        self, local_iterations: int = 1, target_device: Optional[Target] = None
+    ):
+        """
+        Create a new instance of UCCDefault1 compiler
+
+            Args:
+                local_iterations (int): Number of times to run the local passes
+                target_device (qiskit.transpiler.Target): (Optional) The target device to compile the circuit for
+        """
         self.pass_manager = PassManager()
         self._1q_basis = ["rz", "rx", "ry", "h"]
         self._2q_basis = ["cx"]
@@ -42,13 +52,17 @@ class UCCDefault1:
                 (1,): False,
             },
         }
-        self.add_local_passes(local_iterations)
+        self._add_local_passes(local_iterations)
+        self._add_map_passes(target_device)
+        self.pass_manager.append(
+            BasisTranslator(sel, target_basis=self.target_basis)
+        )
 
     @property
     def default_passes(self):
         return
 
-    def add_local_passes(self, local_iterations):
+    def _add_local_passes(self, local_iterations):
         for _ in range(local_iterations):
             self.pass_manager.append(
                 BasisTranslator(sel, target_basis=self.target_basis)
@@ -70,9 +84,9 @@ class UCCDefault1:
             # self.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=self._1q_basis))
             # self.pass_manager.append(BasisTranslator(sel, target_basis=self.target_basis))
 
-    def add_map_passes(self, coupling_list=None):
-        if coupling_list is not None:
-            coupling_map = CouplingMap(couplinglist=coupling_list)
+    def _add_map_passes(self, target_device: Optional[Target] = None):
+        if target_device is not None:
+            coupling_map = target_device.build_coupling_map()
             # self.pass_manager.append(ElidePermutations())
             # self.pass_manager.append(SpectralMapping(coupling_list))
             # self.pass_manager.append(SetLayout(pass_manager_config.initial_layout))
@@ -86,7 +100,7 @@ class UCCDefault1:
                 )
             )
 
-            self.pass_manager.append(VF2Layout(coupling_map=coupling_map))
+            self.pass_manager.append(VF2Layout(target=target_device))
             self.pass_manager.append(ApplyLayout())
             self.pass_manager.append(
                 SabreSwap(
@@ -97,19 +111,14 @@ class UCCDefault1:
                 )
             )
             # self.pass_manager.append(MapomaticLayout(coupling_map))
-            self.pass_manager.append(VF2PostLayout(coupling_map=coupling_map))
+            self.pass_manager.append(VF2PostLayout(target=target_device))
             self.pass_manager.append(ApplyLayout())
-            self.add_local_passes(1)
-            self.pass_manager.append(VF2PostLayout(coupling_map=coupling_map))
+            self._add_local_passes(1)
+            self.pass_manager.append(VF2PostLayout(target=target_device))
             self.pass_manager.append(ApplyLayout())
 
-    def run(self, circuits, coupling_list=None):
-        self.add_map_passes(coupling_list)
-        self.pass_manager.append(
-            BasisTranslator(sel, target_basis=self.target_basis)
-        )
-        out_circuits = self.pass_manager.run(circuits)
-        return out_circuits
+    def run(self, circuits):
+        return self.pass_manager.run(circuits)
 
 
 def _get_trial_count(default_trials=5):

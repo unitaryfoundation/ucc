@@ -1,0 +1,6 @@
+# Compiler versions: qiskit=1.4.0, cirq=1.4.1, pytket=2.0.0, ucc=0.4.3 # OS: Linux #25~22.04.1-Ubuntu SMP Thu Jan 16 21:37:09 UTC 2025, Architecture: 64bit, CPU Cores: 8
+compiler,circuit_name,raw_multiq_gates,compile_time,compiled_multiq_gates
+cirq,prep_select,9744,120.0618326663971,9712
+pytket-peep,prep_select,9744,175.34488248825073,9698
+pytket-peep,qv,15000,257.56041073799133,14856
+cirq,qv,15000,238.01000213623047,14856

@@ -27,13 +27,16 @@ By leveraging [qBraid](https://github.com/qBraid/qBraid), UCC interfaces automat
 pip install ucc
 ```
 
-If developing or running benchmark, please install [Poetry](https://github.com/python-poetry/install.python-poetry.org), then setup a dev version:
+If developing or running benchmarks, please install [Poetry](https://github.com/python-poetry/install.python-poetry.org), which is used to managed dependencies. Then setup a dev version via:
 
 ```bash
 git clone https://github.com/unitaryfund/ucc.git
 cd ucc
 poetry install
 ```
+For any subsequent commands mentioned in the docs, we assume you either prefix each command with `poetry run`, or
+you first activate the [poetry managed virtual environment](https://python-poetry.org/docs/managing-environments/#activating-the-environment>) by running the output of `poetry env activate` in your shell.
+
 
 ### Example with Qiskit, Cirq, and PyTKET
 
@@ -70,17 +73,13 @@ def test_cirq_compile():
 <!-- comment used to strip this section from being added to the docs build-->
 ## How does UCC stack up?
 
-UCC seeks to provide an end-to-end compiler that works well for the majority of the users out of the box. Today, this is achieved by building on and customizing [Qiskit](https://github.com/Qiskit/qiskit) transpiler passes. To ensure these customizations improve performance and meet user needs, we regularly run benchmarks comparing UCC against the latest versions of leading quantum compiler frameworks across a range of circuits. Here’s the latest:
+UCC seeks to provide an end-to-end compiler that works well for the majority of the users out of the box. Today, this is achieved by running a particular subset of [Qiskit](https://github.com/Qiskit/qiskit) transpiler passes. 
+To ensure we continue to improve performance and meet user needs, we regularly run benchmarks comparing UCC against the latest versions of leading quantum compiler frameworks across a range of circuits. Here’s the latest:
 ![alt text](benchmarks/latest_compiler_benchmarks_by_circuit.png)
-
-In addition to raw compilation stats, we simulate the compiled circuits with a noisy density matrix simulation to see how each compiler impacts performance.
-Here we plot the absolute errors $|\langle O\rangle_{C_i,\text{ideal}} - \langle O\rangle_{C_i,\text{noisy}}|$ for a collection of circuits $C_i$.
-
-![Violin plot showing absolute error of each compiler across a variety of circuits](benchmarks/latest_expval_benchmark_by_compiler.png)
 
 And here you can see progress over time, with new package versions labeled for each compiler:
 ![alt text](benchmarks/avg_compiler_benchmarks_over_time.png)
-Note that the compile times before 2024-12-10 may have been run on different classical compute instances, so their runtime is not reported here, but you can find this data in benchmarks/results.
+where pytket-peep indicates the `FullPeepHoleOptimize` function of PyTKET. Note that the compile times before 2024-12-10 may have been run on different classical compute instances, so their runtime is not reported here, but you can find this data in benchmarks/results.
 After 2024-12-10, all data present in this plot is on the same compute instance using our [ucc-benchmarks](https://github.com/unitaryfund/ucc/blob/main/.github/workflows/ucc-benchmarks.yml) GitHub Actions workflow.
 
 To learn more about running these benchmarks, the overall benchmark philosophy, or how to contribute to improving the benchmarking methodology, check out the [benchmarking section](https://ucc.readthedocs.io/en/latest/benchmarking.html) in the docs.
@@ -101,4 +100,4 @@ If you have questions about contributing please ask on the [Unitary Foundation D
 ## License
 
 UCC is distributed under [GNU Affero General Public License version 3.0](https://www.gnu.org/licenses/agpl-3.0.en.html)(AGPLv3).
-Parts of ucc contain code or modified code that is part of [Qiskit](https://github.com/Qiskit/qiskit) or [Qiskit Benchpress](https://github.com/Qiskit/benchpress), which are distributed under Apache 2.0 license.
+Parts of ucc contain code or modified code that is part of [Qiskit](https://github.com/Qiskit/qiskit) or [Qiskit Benchpress](https://github.com/Qiskit/benchpress), which are distributed under the Apache 2.0 license.

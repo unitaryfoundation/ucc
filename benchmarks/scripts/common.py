@@ -9,11 +9,9 @@ from cirq import optimize_for_target_gateset
 import cirq
 from pytket.circuit import OpType
 from pytket.passes import (
-    DecomposeBoxes,
-    RemoveRedundancies,
     SequencePass,
-    SimplifyInitial,
     AutoRebase,
+    FullPeepholeOptimise,
 )
 from pytket.predicates import CompilationUnit
 import qiskit
@@ -61,8 +59,8 @@ def get_compile_function(compiler_alias):
     match compiler_alias:
         case "ucc":
             return ucc_compile
-        case "pytket":
-            return pytket_compile
+        case "pytket-peep":
+            return pytket_peep_compile
         case "qiskit":
             return qiskit_compile
         case "cirq":
@@ -80,24 +78,22 @@ def get_native_rep(qasm_string, compiler_alias):
     if compiler_alias == "ucc":
         # Qiskit used for UCC to get raw gate counts
         native_circuit = translate(qasm_string, "qiskit")
+    elif compiler_alias == "pytket-peep":
+        native_circuit = translate(qasm_string, "pytket")
     else:
         native_circuit = translate(qasm_string, compiler_alias)
 
     return native_circuit
 
 
-# PyTkets compilation
-def pytket_compile(pytket_circuit):
+# Uses FullPeepholeOptimise
+def pytket_peep_compile(pytket_circuit):
     compilation_unit = CompilationUnit(pytket_circuit)
-    seqpass = SequencePass(
-        [
-            SimplifyInitial(),
-            DecomposeBoxes(),
-            RemoveRedundancies(),
-            AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
-        ]
-    )
-    seqpass.apply(compilation_unit)
+    passes = [
+        FullPeepholeOptimise(),
+        AutoRebase({OpType.Rx, OpType.Ry, OpType.Rz, OpType.CX, OpType.H}),
+    ]
+    SequencePass(passes).apply(compilation_unit)
     return compilation_unit.circuit
 
 
@@ -287,7 +283,7 @@ def count_multi_qubit_gates(circuit, compiler_alias):
             return count_multi_qubit_gates_qiskit(circuit)
         case "cirq":
             return count_multi_qubit_gates_cirq(circuit)
-        case "pytket":
+        case "pytket-peep":
             return count_multi_qubit_gates_pytket(circuit)
         case _:
             return "Unknown compiler alias."
@@ -406,7 +402,7 @@ def annotate_and_adjust(
         ha="center",
         fontsize=fontsize,
         color=color,
-        rotation=15,
+        rotation=0,
         arrowprops=dict(
             arrowstyle="->",
             color=color,
@@ -467,15 +463,15 @@ def annotate_and_adjust(
 
 
 def adjust_axes_to_fit_labels(
-    ax, x_scale=1.0, y_scale=1.0, x_log=False, y_log=False
+    ax, x_scale=[1.0, 1.0], y_scale=[1.0, 1.0], x_log=False, y_log=False
 ):
     """
     Adjust the axes limits to ensure all labels and annotations fit within the view. In-place operation.
 
     Parameters:
     - ax: The Matplotlib axes object to adjust.
-    - x_scale: The factor by which to expand the x-axis limits.
-    - y_scale: The factor by which to expand the y-axis limits.
+    - x_scale: A list with two values [left_factor, right_factor] to scale the x-axis.
+    - y_scale: A list with two values [bottom_factor, top_factor] to scale the y-axis.
     - x_log: Set to True if the x-axis uses a logarithmic scale.
     - y_log: Set to True if the y-axis uses a logarithmic scale.
     """
@@ -508,22 +504,23 @@ def adjust_axes_to_fit_labels(
         if bbox.y1 > y_max:  # Top edge
             y_max = bbox.y1
 
-    # Apply scaling factors based on whether axes are logarithmic
+    # Apply scaling factors for x-axis
     if x_log:
-        x_min = x_min / x_scale
-        x_max = x_max * x_scale
+        x_min = x_min / x_scale[0]  # Left scaling
+        x_max = x_max * x_scale[1]  # Right scaling
     else:
         x_range = x_max - x_min
-        x_min -= (x_scale - 1) * x_range
-        x_max += (x_scale - 1) * x_range
+        x_min -= (x_scale[0] - 1) * x_range  # Left scaling
+        x_max += (x_scale[1] - 1) * x_range  # Right scaling
 
+    # Apply scaling factors for y-axis
     if y_log:
-        y_min = y_min / y_scale
-        y_max = y_max * y_scale
+        y_min = y_min / y_scale[0]  # Bottom scaling
+        y_max = y_max * y_scale[1]  # Top scaling
     else:
         y_range = y_max - y_min
-        y_min -= (y_scale - 1) * y_range
-        y_max += (y_scale - 1) * y_range
+        y_min -= (y_scale[0] - 1) * y_range  # Bottom scaling
+        y_max += (y_scale[1] - 1) * y_range  # Top scaling
 
     # Set the new axis limits
     ax.set_xlim(x_min, x_max)

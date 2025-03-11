@@ -23,7 +23,7 @@ QASM_FILES=(
 )
 
 # Define your list of compilers
-COMPILERS=("ucc" "qiskit" "pytket" "cirq")
+COMPILERS=("ucc" "qiskit" "pytket-peep" "cirq")
 
 # Default parallelism 4 (can be overridden by a command line argument)
 PARALLELISM="${1:-4}"
@@ -38,34 +38,40 @@ for qasm_file in "${QASM_FILES[@]}"; do
     for compiler in "${COMPILERS[@]}"; do
         # Combine the common folder path with the QASM file
         full_qasm_file="${QASM_FOLDER}${qasm_file}"
-        
+
         # Build the command, passing the results folder as an argument
         command="python3 $(dirname "$0")/benchmark_script.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\""
 
         commands+=("$command")
     done
 done
-
-QASM_EXPVAL_FILES=(
-    "benchpress/qaoa_barabasi_albert_N10_3reps_basis_rz_rx_ry_cx.qasm"
-    "benchpress/qv_N010_12345_basis_rz_rx_ry_cx.qasm"
-    "benchpress/qft_N010_basis_rz_rx_ry_cx.qasm"
-    "benchpress/square_heisenberg_N9_basis_rz_rx_ry_cx.qasm"
-    "ucc/prep_select_N10_ghz_basis_rz_rx_ry_h_cx.qasm"
-    "ucc/qcnn_N10_4layers_basis_rz_rx_ry_h_cx.qasm"
-)
-LOG_EXPVAL=false
-for qasm_file in "${QASM_EXPVAL_FILES[@]}"; do
-    for compiler in "${COMPILERS[@]}"; do
-        # Combine the common folder path with the QASM file
-        full_qasm_file="${QASM_FOLDER}${qasm_file}"
-        
-        # Build the command, passing the results folder as an argument
-        command="poetry run python $(dirname "$0")/expval_benchmark.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\" $LOG_EXPVAL"
-
-        commands+=("$command")
-    done
-done
-
-# Execute all the commands in parallel up to the specified number of parallel jobs
+# Execute the timing benchmarks in parallel up to the specified number of parallel jobs
+# Intentionally run these first to avoid contention with expected value benchmarks below
+# that could impact timing results
 parallel -j "$PARALLELISM" ::: "${commands[@]}"
+
+# Not currently running expectation value benchmarks
+# QASM_EXPVAL_FILES=(
+#     "benchpress/qaoa_barabasi_albert_N10_3reps_basis_rz_rx_ry_cx.qasm"
+#     "benchpress/qv_N010_12345_basis_rz_rx_ry_cx.qasm"
+#     "benchpress/qft_N010_basis_rz_rx_ry_cx.qasm"
+#     "benchpress/square_heisenberg_N9_basis_rz_rx_ry_cx.qasm"
+#     "ucc/prep_select_N10_ghz_basis_rz_rx_ry_h_cx.qasm"
+#     "ucc/qcnn_N10_4layers_basis_rz_rx_ry_h_cx.qasm"
+# )
+# LOG_EXPVAL=false
+# commands=()
+# for qasm_file in "${QASM_EXPVAL_FILES[@]}"; do
+#     for compiler in "${COMPILERS[@]}"; do
+#         # Combine the common folder path with the QASM file
+#         full_qasm_file="${QASM_FOLDER}${qasm_file}"
+
+#         # Build the command, passing the results folder as an argument
+#         command="poetry run python $(dirname "$0")/expval_benchmark.py \"$full_qasm_file\" \"$compiler\" \"$RESULTS_FOLDER\" $LOG_EXPVAL"
+
+#         commands+=("$command")
+#     done
+# done
+
+# # Execute the expected value benchmarks in parallel up to the specified number of parallel jobs
+# parallel -j "$PARALLELISM" ::: "${commands[@]}"
