@@ -261,11 +261,7 @@ def count_multi_qubit_gates_pytket(pytket_circuit):
 
 # Multi-qubit gate count for Qiskit
 def count_multi_qubit_gates_qiskit(qiskit_circuit):
-    return sum(
-        1
-        for instruction, _, _ in qiskit_circuit.data
-        if instruction.num_qubits > 1
-    )
+    return qiskit_circuit.num_nonlocal_gates()
 
 
 # Multi-qubit gate count for Cirq
