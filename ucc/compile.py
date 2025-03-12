@@ -26,9 +26,7 @@ supported_circuit_formats = ConversionGraph().nodes()
 
 
 def compile(
-    circuit,
-    return_format="original",
-    target_device=None,
+    circuit, return_format="original", target_device=None, custom_passes=None
 ):
     """Compiles the provided quantum `circuit` by translating it to a Qiskit
     circuit, transpiling it, and returning the optimized circuit in the
@@ -40,6 +38,7 @@ def compile(
             e.g., "TKET", "OpenQASM2". Check ``ucc.supported_circuit_formats()``.
             Defaults to the format of the input circuit.
         target_device (qiskit.transpiler.Target): (optional) The target device to compile the circuit for. None if no device to target
+        custom_passes (list[qiskit.transpiler.TransformationPass]): (optional) A list of custom passes to apply after the default set
 
     Returns:
         object: The compiled circuit in the specified format.
@@ -49,7 +48,10 @@ def compile(
 
     # Translate to Qiskit Circuit object
     qiskit_circuit = transpile(circuit, "qiskit")
-    compiled_circuit = UCCDefault1(target_device=target_device).run(
+    ucc_default1 = UCCDefault1(target_device=target_device)
+    if custom_passes is not None:
+        ucc_default1.pass_manager.append(custom_passes)
+    compiled_circuit = ucc_default1.run(
         qiskit_circuit,
     )
 

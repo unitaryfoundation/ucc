@@ -40,11 +40,16 @@ For example, we can define a random circuit in Qiskit and optimize it using the 
    gates = ["cx", "cz", "cy", "swap", "x", "y", "z", "s", "sdg", "h"]
    num_qubits = 10
    raw_circuit = random_clifford_circuit(
-       num_qubits, gates=gates, num_gates=10 * num_qubits * num_qubits
+      num_qubits, gates=gates, num_gates=10 * num_qubits * num_qubits
    )
    compiled_circuit = ucc.compile(raw_circuit)
-   print(f"Number of multi-qubit gates in original circuit: {count_multi_qubit_gates_qiskit(raw_circuit)}")
-   print(f"Number of multi-qubit gates in compiled circuit: {count_multi_qubit_gates_qiskit(compiled_circuit)}")
+   print(
+      f"Number of multi-qubit gates in original circuit: {count_multi_qubit_gates_qiskit(raw_circuit)}"
+   )
+   print(
+      f"Number of multi-qubit gates in compiled circuit: {count_multi_qubit_gates_qiskit(compiled_circuit)}"
+   )
+
 
 .. testoutput::
    :hide:
@@ -54,26 +59,12 @@ For example, we can define a random circuit in Qiskit and optimize it using the 
    Number of multi-qubit gates in compiled circuit: ...
 
 
-Key modules
-***********
+Default Compilation Passes
+**************************
 
-UCC includes the following modules:
-
-- ``quantum_translator`` for translating one circuit representation into another, e.g. Qiskit into Cirq
-- ``transpilers`` containing the UCC default transpiler pass sequence and execution flow. UCC default passes, i.e. passes included in ``UCC_Default1`` are:
-   - ``BasisTranslator``
-   - ``Optimize1qGatesDecomposition``
-   - ``CommutativeCancellation``
-   - ``Collect2qBlocks``
-   - ``ConsolidateBlocks``
-   - ``UnitarySynthesis``
-   - ``Optimize1qGatesDecomposition``
-   - ``CollectCliffords``
-   - ``HighLevelSynthesis`` (greedy Clifford synthesis)
-
-These include the passes listed in ``UCC_Default1``, along with others for specialized use.
-The full list of transpiler passes available in UCC can be found in the :doc:`api`.
-
+When compiling, UCC uses a set of pre-defined qiskit passes set of compilation passes specified in ``ucc.transpilers.ucc_defaults.UCCDefault1``.
+These were chosen based on their good default performance on a set of input circuits. The vision for UCC is
+to iterate and improve on these defaults, following the process in :doc:`contributing`.
 
 Customization
 *************
@@ -90,11 +81,13 @@ UCC settings can be adjusted using the keyword arguments of the ``ucc.compile()`
        circuit,
        return_format="original",
        target_device=None,
+       custom_passes=None
    )
 
 
 - ``return_format`` is the format in which the input circuit will be returned, e.g. "TKET" or "OpenQASM2". Check ``ucc.supported_circuit_formats()`` for supported circuit formats. Default is the format of input circuit.
 - ``target_device`` can be specified as a Qiskit backend or coupling map, or a list of connections between qubits. If None, all-to-all connectivity is assumed. If a Qiskit backend or coupling map is specified, only the coupling list extracted from the backend is used.
+- ``custom_passes`` can be a list of Qiskit ``TransformationPass`` to run after the default set of passes in ``UCCDefault1``.
 
 Writing a custom pass
 =====================
@@ -132,36 +125,39 @@ In the following example, we demonstrate how to create a custom pass, where the 
 Applying a non-default pass in the transpilation sequence
 =========================================================
 
-UCC's built-in pass manager ``UCCDefault1().pass_manager`` can be used to apply a non-default or a custom pass in the sequence of transpilation passes.
-In the following example we show how to add passes for merging single qubit rotations interrupted by a commuting 2 qubit gate.
+The `compile` method accepts an optional list of custom passes to run after the default suite defined in the  built-in pass manager ``UCCDefault1().pass_manager``.
+In the following example we show how to add pre-defined Qiskit passes for merging single qubit rotations interrupted by a commuting 2 qubit gate.
 
 .. testcode:: custom_pass
 
    from qiskit.circuit.equivalence_library import SessionEquivalenceLibrary as sel
-   from qiskit.transpiler.passes import BasisTranslator, Optimize1qGatesSimpleCommutation
-   from ucc import UCCDefault1
+   from qiskit.transpiler.passes import (
+      BasisTranslator,
+      Optimize1qGatesSimpleCommutation,
+   )
+   from ucc import compile
 
 
-   single_q_basis = ['rz', 'rx', 'ry', 'h']
-   target_basis = single_q_basis.append('cx')
-   ucc_compiler = UCCDefault1()
+   single_q_basis = ["rz", "rx", "ry", "h"]
+   target_basis = single_q_basis.append("cx")
 
-   ucc_compiler.pass_manager.append(Optimize1qGatesSimpleCommutation(basis=single_q_basis))
-   ucc_compiler.pass_manager.append(BasisTranslator(sel, target_basis=target_basis))
+   custom_passes = [
+      Optimize1qGatesSimpleCommutation(basis=single_q_basis),
+      BasisTranslator(sel, target_basis=target_basis),
+   ]
 
-   custom_compiled_circuit = ucc_compiler.run(circuit_to_compile)
+   custom_compiled_circuit = compile(
+      circuit_to_compile, custom_passes=custom_passes
+   )
 
-
-Alternatively, we can add a custom pass in the sequence, as shown in the following example.
+Alternatively, we can add our custom pass, as shown in the following example.
 
 .. testcode:: custom_pass
 
-   from ucc import UCCDefault1
-   ucc_compiler = UCCDefault1()
-
-   ucc_compiler.pass_manager.append(MyCustomPass())
-
-   custom_compiled_circuit = ucc_compiler.run(circuit_to_compile)
+   from ucc import compile
+   custom_compiled_circuit = compile(
+      circuit_to_compile, custom_passes=[MyCustomPass()]
+   )
 
 
 A note on terminology
