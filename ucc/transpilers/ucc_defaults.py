@@ -70,7 +70,7 @@ class UCCDefault1:
             self.pass_manager.append(Optimize1qGatesDecomposition())
             self.pass_manager.append(CommutativeCancellation())
             self.pass_manager.append(Collect2qBlocks())
-            self.pass_manager.append(ConsolidateBlocks(force_consolidate=True))
+            self.pass_manager.append(ConsolidateBlocks())
             self.pass_manager.append(
                 UnitarySynthesis(basis_gates=self.target_basis)
             )
