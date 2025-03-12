@@ -219,11 +219,11 @@ def bqskit_compile(bqskit_circuit):
 
     gate_set = {RXGate(), RYGate(), RZGate(), HGate(), CXGate()}
 
-    with Compiler(num_workers=1, num_blas_threads=1) as c:
+    with Compiler() as c:
         workflow = build_workflow(
             bqskit_circuit,
             model=MachineModel(bqskit_circuit.num_qudits, gate_set=gate_set),
-            optimization_level=2,
+            optimization_level=4,
         )
         return c.compile(bqskit_circuit, workflow=workflow)
 

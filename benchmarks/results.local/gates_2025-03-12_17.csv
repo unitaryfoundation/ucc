@@ -1,0 +1,18 @@
+# Compiler versions: qiskit=1.3.3, cirq=1.4.1, pytket=1.40.0, ucc=0.4.3 # OS: Darwin Darwin Kernel Version 24.3.0: Thu Jan  2 20:24:22 PST 2025; root:xnu-11215.81.4~3/RELEASE_ARM64_T6041, Architecture: 64bit, CPU Cores: 14
+compiler,circuit_name,raw_multiq_gates,compile_time,compiled_multiq_gates
+qiskit,qaoa_barabasi_albert,1176,0.04715299606323242,1176
+ucc,qaoa_barabasi_albert,1176,0.08090496063232422,1176
+cirq,qaoa_barabasi_albert,1176,1.9349968433380127,1176
+ucc,qv,15000,1.1021828651428223,14856
+pytket-peep,qaoa_barabasi_albert,1176,6.459327936172485,1176
+qiskit,qv,15000,3.8434081077575684,14856
+pytket-peep,qv,15000,217.58339309692383,14856
+ucc,qft,10050,1.058962106704712,2740
+qiskit,qft,10050,0.5560958385467529,3244
+pytket-peep,qft,10050,64.87620186805725,4498
+cirq,qv,15000,215.43770909309387,14856
+cirq,qft,10050,36.33185577392578,4648
+ucc,square_heisenberg,2160,0.19317317008972168,540
+qiskit,square_heisenberg,2160,0.2648489475250244,540
+pytket-peep,square_heisenberg,2160,15.423096179962158,540
+cirq,square_heisenberg,2160,10.186025142669678,540
