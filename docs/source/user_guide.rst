@@ -125,7 +125,7 @@ In the following example, we demonstrate how to create a custom pass, where the 
 Applying a non-default pass in the transpilation sequence
 =========================================================
 
-The `compile` method accepts an optional list of custom passes to run after the default suite defined in the  built-in pass manager ``UCCDefault1().pass_manager``.
+The ``compile`` method accepts an optional list of custom passes to run after the default suite defined in the  built-in pass manager ``UCCDefault1().pass_manager``.
 In the following example we show how to add pre-defined Qiskit passes for merging single qubit rotations interrupted by a commuting 2 qubit gate.
 
 .. testcode:: custom_pass
