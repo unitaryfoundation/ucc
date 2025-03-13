@@ -14,16 +14,16 @@ QASM_FOLDER="$SCRIPT_DIR/../qasm_circuits/qasm2/"
 
 # Define your list of QASM file names (without the common path)
 QASM_FILES=(
-    "benchpress/qaoa_barabasi_albert_N100_3reps_basis_rz_rx_ry_cx.qasm"
-    "benchpress/qv_N100_12345_basis_rz_rx_ry_cx.qasm"
+#    "benchpress/qaoa_barabasi_albert_N100_3reps_basis_rz_rx_ry_cx.qasm"
+#    "benchpress/qv_N100_12345_basis_rz_rx_ry_cx.qasm"
     "benchpress/qft_N100_basis_rz_rx_ry_cx.qasm"
-    "benchpress/square_heisenberg_N100_basis_rz_rx_ry_cx.qasm"
-    "ucc/prep_select_N25_ghz_basis_rz_rx_ry_h_cx.qasm"
-    "ucc/qcnn_N100_7layers_basis_rz_rx_ry_h_cx.qasm"
+#    "benchpress/square_heisenberg_N100_basis_rz_rx_ry_cx.qasm"
+#    "ucc/prep_select_N25_ghz_basis_rz_rx_ry_h_cx.qasm"
+#    "ucc/qcnn_N100_7layers_basis_rz_rx_ry_h_cx.qasm"
 )
 
 # Define your list of compilers
-COMPILERS=("ucc" "qiskit" "pytket-peep" "cirq" "bqskit")
+COMPILERS=("bqskit") # ("ucc" "qiskit" "pytket-peep" "cirq" "bqskit")
 
 # Default parallelism 4 (can be overridden by a command line argument)
 PARALLELISM="${1:-4}"

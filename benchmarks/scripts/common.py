@@ -216,6 +216,9 @@ def bqskit_compile(bqskit_circuit):
     from bqskit.compiler import Compiler
 
     from bqskit.compiler.compile import build_workflow
+    import bqskit
+
+    bqskit.enable_logging()
 
     gate_set = {RXGate(), RYGate(), RZGate(), HGate(), CXGate()}
 
