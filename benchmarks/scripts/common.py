@@ -3,6 +3,7 @@ import platform
 import os
 import pandas as pd
 import matplotlib
+import re
 from datetime import datetime
 from typing import List
 from cirq import optimize_for_target_gateset
@@ -525,3 +526,8 @@ def adjust_axes_to_fit_labels(
     # Set the new axis limits
     ax.set_xlim(x_min, x_max)
     ax.set_ylim(y_min, y_max)
+
+
+def extract_compiler_versions(header):
+    pattern = r"(\w+)=([\d\.]+)"
+    return dict(re.findall(pattern, header))

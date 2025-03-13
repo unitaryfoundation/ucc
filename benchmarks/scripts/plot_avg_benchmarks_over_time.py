@@ -1,10 +1,13 @@
-from common import annotate_and_adjust, adjust_axes_to_fit_labels
-
+from common import (
+    annotate_and_adjust,
+    adjust_axes_to_fit_labels,
+    extract_compiler_versions,
+)
+from pkg_resources import parse_version
 import glob
 import pandas as pd
 import matplotlib.pyplot as plt
 import os
-import re
 
 
 ### Load data
@@ -14,11 +17,6 @@ results_folder = os.path.join(directory_of_this_file, "../results")
 csv_files = glob.glob(os.path.join(results_folder, "gates*.csv"))
 
 dataframes = []
-
-
-def extract_compiler_versions(header):
-    pattern = r"(\w+)=([\d\.]+)"
-    return dict(re.findall(pattern, header))
 
 
 print("Loading data files...")
@@ -39,6 +37,8 @@ for file in csv_files:
         compiler_versions.pop("pytket")
     df["compiler_version"] = df["compiler"].map(compiler_versions)
     df["compiler"] = df["compiler"].replace("qiskit", "qiskit-default")
+    # Scrub semver string of any extraneous period at end
+    df["compiler_version"] = df["compiler_version"].str.rstrip(".")
 
     dataframes.append(df)
 
@@ -50,7 +50,22 @@ df_dates = df_dates[df_dates["compiler"] != "pytket"]
 # Remove data from dates between 2025-02-07 through 2025-02-28 while #251 was being fixed
 df_dates = df_dates[
     ~((df_dates["date"] >= "2025-02-07") & (df_dates["date"] < "2025-02-28"))
+    & (df_dates["date"] != "2025-03-05")
 ]
+
+# Ensure 'date' is in datetime format
+df_dates["date"] = pd.to_datetime(df_dates["date"])
+
+# Get the earliest date for each compiler version
+new_version_dates = df_dates.groupby(["compiler", "compiler_version"])[
+    "date"
+].min()
+
+# Get all unique first occurrence dates
+unique_dates = new_version_dates.unique()
+
+# Filter on first occurrence of each compiler version based on the date
+df_dates = df_dates[df_dates["date"].isin(unique_dates)]
 
 # Find the average compiled ratio for each compiler on each date
 avg_compiled_ratio = (
@@ -61,6 +76,20 @@ avg_compiled_ratio = (
     .reset_index()
     .sort_values("date")
 )
+# Sort the dataframe by package, date, and parsed version
+avg_compiled_ratio["parsed_version"] = avg_compiled_ratio[
+    "compiler_version"
+].apply(parse_version)
+avg_compiled_ratio = avg_compiled_ratio.sort_values(
+    by=["date", "compiler", "parsed_version"], ascending=[True, True, True]
+)
+avg_compiled_ratio = avg_compiled_ratio.sort_values(
+    by=["date", "compiler", "compiler_version"], ascending=[True, True, True]
+)
+# Keep only the highest version per (date, package)
+avg_compiled_ratio = avg_compiled_ratio.drop_duplicates(
+    subset=["date", "compiler"], keep="last"
+)
 
 # Find the average compile time for each compiler on each date
 avg_compile_time = (
@@ -70,6 +99,17 @@ avg_compile_time = (
     .sort_values("date")
 )
 
+# Sort the dataframe by package, date, and parsed version
+avg_compile_time["parsed_version"] = avg_compile_time[
+    "compiler_version"
+].apply(parse_version)
+avg_compile_time = avg_compile_time.sort_values(
+    by=["date", "compiler", "parsed_version"], ascending=[True, True, True]
+)
+# Keep only the highest version per (date, package)
+avg_compile_time = avg_compile_time.drop_duplicates(
+    subset=["date", "compiler"], keep="last"
+)
 
 ###### Plotting
 # Ensure colors are consistently assigned to each compiler
@@ -116,11 +156,10 @@ for date in avg_compiled_ratio["date"].unique():
         compiled_ratio = row["compiled_ratio"]
 
         # Check if the version has changed
-        if current_version != last_version_seen[compiler]:
-            text = f"{compiler}={current_version}"
+        if row["parsed_version"] != last_version_seen[compiler]:
+            text = f"{current_version}"
             xy = (row["date"], compiled_ratio)
             color = color_map[compiler]
-
             # Add the annotation and adjust for overlap
             annotate_and_adjust(
                 ax=ax[0],
@@ -128,13 +167,13 @@ for date in avg_compiled_ratio["date"].unique():
                 xy=xy,
                 color=color,
                 previous_bboxes=previous_bboxes,
-                offset=(0, 20),  # Initial offset
+                offset=(0, 17),  # Initial offset
                 increment=2,  # Vertical adjustment step
-                max_attempts=15,
+                max_attempts=20,
             )
             # plt.pause(0.1)
             # Update the last seen version for this compiler
-            last_version_seen[compiler] = current_version
+            last_version_seen[compiler] = row["parsed_version"]
 
 # Set y axis range to be slightly larger than data range
 adjust_axes_to_fit_labels(ax[0], y_scale=[1.1, 1.3])
@@ -177,7 +216,7 @@ for date in avg_compile_time["date"].unique():
 
         # Check if the version has changed
         if current_version != last_version_seen[compiler]:
-            text = f"{compiler}={current_version}"
+            text = f"{current_version}"
             xy = (row["date"], compile_time)
             color = color_map[compiler]
 
@@ -188,7 +227,7 @@ for date in avg_compile_time["date"].unique():
                 xy=xy,
                 color=color,
                 previous_bboxes=previous_bboxes,
-                offset=(0, 20),  # Initial offset
+                offset=(0, 30),  # Initial offset
                 increment=2,  # Vertical adjustment step
                 max_attempts=15,
             )
