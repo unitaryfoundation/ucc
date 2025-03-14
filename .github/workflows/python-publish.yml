@@ -3,6 +3,7 @@ name: Publish Python Package
 on:
   release:
     types: [published]
+  workflow_dispatch:  # This allows manual triggering of the workflow
 
 permissions:
   contents: read
