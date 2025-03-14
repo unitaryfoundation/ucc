@@ -1,14 +1,49 @@
 Changelog
 =========
 
+[0.4.4] - 2025-03-13
+--------------------
+
+In version 0.4.4, we updated and expanded our documentation and streamlined benchmark data visualization. We also implemented more custom observables for our expectation value benchmarks, improved the user experience for adding custom transpiler passes, and switched to using the `FullPeepHoleOptimize` function to benchmark PyTKET based on feedback from the community!
+
+Added
+^^^^^^^^^^^^^^^^^^^^^
+
+- Enable repeat use of `UCCDefault1` and update documentation. #268 [@bachase]
+- Support custom passes in `ucc.compile`. #301 [@bachase]
+- Add note defining `pytket-peep` in README. #284 [@jordandsullivan]
+- Add `dependabot` for automated dependency updates. #297 [@bachase]
+
+Fixed
+^^^^^^^^^^^^^^^^^^^^^
+
+- Improve reproducibility and consistency of benchmarking workflow. #253 [@bachase]
+- Ensure `target_device` is used when specified, not just connectivity, when compiling. #290 [@bachase]
+
+Changed
+^^^^^^^^^^^^^^^^^^^^^
+
+- Change QAOA observable to use the problem Hamiltonian. #260 [@Misty-W]
+- Switch PyTKET to use `FullPeepHoleOptimize`. #266 [@jordandsullivan]
+- Adjust plotting scripts to change resolution to per release in time series plots. #254 [@Misty-W]
+- Update Poetry lock file, Qiskit, and PyTKET versions. #294 [@jordandsullivan]
+- Relabel Qiskit data in plots. #300 [@jordandsullivan]
+
+Removed
+^^^^^^^^^^^^^^^^^^^^^
+
+- Remove violin plots from benchmark visualizations. #282 [@jordandsullivan]
+- Remove outdated README reference to custom transpiler passes. #274 [@jordandsullivan]
+- Remove specific dated data from plots. #283 [@jordandsullivan]
+
 [0.4.3] - 2025-02-26
 --------------------
 
 In version 0.4.3, we enhanced UCC infrastructure, benchmarking, and documentation.
-Release highlights include the introduction of 
+Release highlights include the introduction of
 [Poetry](https://github.com/python-poetry/install.python-poetry.org) for dependency management,
 the automated display of results from benchmarks run on the `main` branch,
-and plotting of expectation value benchmark results. 
+and plotting of expectation value benchmark results.
 In the case of quantum volume circuits, we changed the expectation value metric from the default
 ZZZZZZZZZZZ observable to the heavy output probability.
 
@@ -92,7 +127,7 @@ Added
 - Reorganize code structure #70 [@Misty-W]
 - Add expectation value benchmark #66 [@natestemen]
 - benchmark script #64 [@jordandsullivan]
-- Add Qiskit Optimization pass(es) that improve UCC gate reduction #60 [@Misty-W] 
+- Add Qiskit Optimization pass(es) that improve UCC gate reduction #60 [@Misty-W]
 - Run first hardware benchmarks #58 [@jordandsullivan]
 - Create contribution guide for new transpiler passes #56 [@jordandsullivan]
 - Create user guide #54 [@Misty-W]

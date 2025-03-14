@@ -1,11 +1,12 @@
 [project]
 name = "ucc"
-version = "0.4.3"
+version = "0.4.4"
 description = "Unitary Compiler Collection: A quantum circuit interface and compiler for multiple quantum frameworks"
 authors = [
     {name="Jordan Sullivan", email="jordan@unitary.foundation"},
     {name="Misty Wahl"},
-    {name="Nate Stemen"}
+    {name="Nate Stemen"},
+    {name="Brad Chase"}
 ]
 license = "GPL-3.0"
 readme = "README.md"
