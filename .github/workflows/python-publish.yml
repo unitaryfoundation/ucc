@@ -9,6 +9,15 @@ permissions:
   contents: read
 
 jobs:
+  debug:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Debug event data
+          run: |
+            echo "Event name: ${{ github.event_name }}"
+            echo "Release target_commitish: ${{ github.event.release.target_commitish }}"
+            echo "Ref: ${{ github.ref }}"
+
   release-build:
     runs-on: ubuntu-latest
 
