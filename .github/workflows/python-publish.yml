@@ -11,12 +11,14 @@ permissions:
 jobs:
   debug:
       runs-on: ubuntu-latest
+      if: github.event.release.target_commitish == 'refs/heads/main'  # Ensures release is from main branch
       steps:
         - name: Debug event data
           run: |
             echo "Event name: ${{ github.event_name }}"
             echo "Release target_commitish: ${{ github.event.release.target_commitish }}"
             echo "Ref: ${{ github.ref }}"
+
 
   release-build:
     runs-on: ubuntu-latest
@@ -65,7 +67,7 @@ jobs:
 
       - name: Clean up distributions
         run: rm -rf dist/
-
+  
   pypi-publish:
     runs-on: ubuntu-latest
     needs: testpypi-publish
