@@ -9,17 +9,6 @@ permissions:
   contents: read
 
 jobs:
-  debug:
-      runs-on: ubuntu-latest
-      if: (github.event.release.target_commitish == 'main' && github.event_name == 'release') || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/jordandsullivan-patch-1')      
-      steps:
-        - name: Debug event data
-          run: |
-            echo "Event name: ${{ github.event_name }}"
-            echo "Release target_commitish: ${{ github.event.release.target_commitish }}"
-            echo "Ref: ${{ github.ref }}"
-
-
   release-build:
     runs-on: ubuntu-latest
 
