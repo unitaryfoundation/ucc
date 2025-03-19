@@ -11,7 +11,7 @@ permissions:
 jobs:
   debug:
       runs-on: ubuntu-latest
-      if: github.event.release.target_commitish == 'refs/heads/main'  # Ensures release is from main branch
+      if: github.event.release.target_commitish == 'refs/heads/jordandsullivan-patch-1'  # Ensures release is from main branch
       steps:
         - name: Debug event data
           run: |
