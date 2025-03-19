@@ -69,7 +69,7 @@ jobs:
   pypi-publish:
     runs-on: ubuntu-latest
     needs: testpypi-publish
-    if: github.event.release.target_commitish == 'main'  # Ensures release is from main branch
+    if: github.event.release.target_commitish == 'refs/heads/main'  # Ensures release is from main branch
     permissions:
       id-token: write
     environment:
