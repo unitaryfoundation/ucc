@@ -28,7 +28,7 @@ packages = [{include = "ucc"}]
 [tool.poetry.group.dev.dependencies]
 pytest = ">=6.0"
 pytest-cov = ">=2.10"
-qiskit-aer = "==0.15.1"
+qiskit-aer = ">=0.15.1"
 seaborn = "*"
 ruff = "^0.9.4"
 pre-commit = "^4.1.0"
