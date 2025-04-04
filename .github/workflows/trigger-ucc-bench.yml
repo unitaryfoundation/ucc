@@ -1,0 +1,36 @@
+# Trigger an upgrade of ucc version  in ucc-bench repo in response to push to main
+# To trigger an event in the other repo, we had to install a GitHub app in the
+# ucc-bench repo, and then add the app ID/private key as secrets to this repo
+# so it could trigger the workflow. See
+# https://docs.github.com/en/issues/planning-and-tracking-with-projects/automating-your-project/automating-projects-using-actions
+# for details.
+
+name: Trigger ucc upgrade in ucc-bench
+on:
+  push:
+    branches:
+      - main
+jobs:
+  trigger-benchmarks:
+    runs-on: ubuntu-latest
+    # Don't run on forks or original benchmark commits
+    if: ${{ github.repository == 'unitaryfoundation/ucc' && !contains(github.event.head_commit.message, '[benchmark chore]') }}
+
+    steps:
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.UCC_BENCH_APP_ID }}
+          private-key: ${{ secrets.UCC_BENCH_APP_PRIVATE_KEY }}
+
+      - name: Trigger ucc-main-push event in ucc-bench
+        env:
+          GH_TOKEN: ${{ steps.generate-token.outputs.token }}
+        run: |
+          gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            /repos/unitaryfoundation/ucc-bench/dispatches \
+            -f "event_type=ucc-main-push" -F "client_payload[commit_hash]=${{ github.sha }}"
