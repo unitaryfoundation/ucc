@@ -70,16 +70,8 @@ Contributing a New Compiler Pass
 1. Proposing a New Compiler Pass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If you've found a compiler pass you'd like to implement in UCC, first you'll submit a `New Compiler Pass Discussion <https://github.com/unitaryfoundation/ucc/discussions/new?category=new-compiler-pass>`_, which asks you to provide...
-
-#. Detailed description of the technique
-    #. Provide a written abstract without excessive jargon, citing the source of the technique.
-    #. (Optional, recommended): Include a diagram showing an example circuit and how it would be affected by this pass.
-
-#. Performance expectations
-    #. Estimate how much the technique is expected to reduce gate counts or compile time. This rough estimate helps us prioritize techniques.
-    #. Specify which types of circuits are expected to improve or not improve with this technique.
-    #. Define test circuits of the above types which you will use to validate the technique.
+If you have an idea for a new compiler pass, please feel free to create an `issue <https://github.com/unitaryfoundation/ucc/issues/new/choose>`_.
+If you have a formal proposal for a new compiler pass you intend to develop in UCC, please fill out this `New Compiler Pass Proposal template <https://github.com/unitaryfoundation/ucc/discussions/new?category=new-compiler-pass>`_.
 
 2. Implementing and Validating a Prototype of the Pass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -88,9 +80,7 @@ If you've found a compiler pass you'd like to implement in UCC, first you'll sub
     * A Jupyter notebook or a small script is sufficient for the prototype.
 
 #. Validate the prototype
-    * Use the test circuits defined in section `1. Proposing a New Compiler Pass`_ to validate the technique.
-
-.. _1. Proposing a New Compiler Pass: #proposing-a-new-compiler-pass
+    * Use the test circuits you defined in your proposal to validate the technique.
 
 3. Implementing the New Pass in the Codebase
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
