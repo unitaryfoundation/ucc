@@ -71,7 +71,7 @@ Contributing a New Compiler Pass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If you have an idea for a new compiler pass, please feel free to create an `issue <https://github.com/unitaryfoundation/ucc/issues/new/choose>`_.
-If you have a formal proposal for a new compiler pass you intend to develop in UCC, please fill out this `New Compiler Pass Proposal template <https://github.com/unitaryfoundation/ucc/discussions/categories/new-compiler-pass>`_.
+If you have a formal proposal for a new compiler pass you intend to develop in UCC, please fill out this `New Compiler Pass Proposal template <https://github.com/unitaryfoundation/ucc/discussions/new?category=new-compiler-pass>`_.
 
 2. Implementing and Validating a Prototype of the Pass
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
