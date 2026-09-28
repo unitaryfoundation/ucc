@@ -45,7 +45,7 @@ def compile(
         target_gateset (set[str]): (optional) The gateset to compile the circuit to.
             e.g. {"cx", "rx",...}. Defaults to the gate set of the target device if available. If no `target_gateset` or ` target_backend` is provided, defaults to {"cx", "rz", "rx", "ry", "h"}.
         target_backend (qiskit.providers.backend): (optional)
-            The target device  to compile the circuit for. Can be specified as a Qiskit backend. If None, all-to-all connectivity is assumed. If a `target_backend` is specified, `target_backend.operation_names` supercedes the `target_gateset`.
+            The target device  to compile the circuit for. Can be specified as a Qiskit backend. If None, all-to-all connectivity is assumed. If a `target_backend` is specified, `target_backend.operation_names` supersedes the `target_gateset`.
         custom_passes (list[qiskit.transpiler.TransformationPass]): (optional)
             A list of custom passes to apply after the default set
             of passes. Defaults to None.

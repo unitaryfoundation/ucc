@@ -33,7 +33,7 @@ For normal users of `UCC`, you can install via `pip` as
 pip install ucc
 ```
 
-If developing, including if building custom transpiler passes, please install [uv](https://docs.astral.sh/uv/getting-started/installation/), which is used to managed dependencies and ensure a reproducible development enviroment. Once uv is installed, setup your development environment via
+If developing, including if building custom transpiler passes, please install [uv](https://docs.astral.sh/uv/getting-started/installation/), which is used to manage dependencies and ensure a reproducible development environment. Once uv is installed, setup your development environment via
 
 ```bash
 git clone https://github.com/unitaryfoundation/ucc.git
