@@ -136,7 +136,7 @@ def test_custom_pass():
                     dag.substitute_node(node, XGate())
             return dag
 
-    # Example usage with a cirq circuit, stil showcasing the cross-frontend compatibility
+    # Example usage with a cirq circuit, still showcasing the cross-frontend compatibility
 
     qubit = NamedQubit("q_0")
     cirq_circuit = CirqCircuit(H(qubit))
@@ -153,7 +153,7 @@ def test_compile_target_backend_opset():
     # Create a simple backend that does not have direct CX between 0 and 2
     t = Mybackend()
     # Check that the gates in the original circuit are not support by the target
-    # to ensure this isn't a trival check
+    # to ensure this isn't a trivial check
     assert set(op.name for op in circuit).issubset(t.operation_names) is False
 
     result_circuit = compile(

@@ -43,7 +43,7 @@ Running the benchmarks
 
 To run the benchmarks locally, follow the steps in the
 `ucc-bench README <https://github.com/unitaryfoundation/ucc-bench/blob/main/README.md#usage-running-a-benchmark-suite>`_. These instructions
-will tell you how to setup your enviroment, install the required dependencies, and run the benchmarks.
+will tell you how to setup your environment, install the required dependencies, and run the benchmarks.
 
 
 Circuits
