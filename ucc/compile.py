@@ -2,6 +2,8 @@ from qbraid.programs.alias_manager import get_program_type_alias
 from qbraid.transpiler import ConversionGraph
 from qbraid.transpiler import transpile as translate
 from qiskit import transpile as qiskit_transpile
+from qiskit.transpiler import PassManager
+from .transpilers.phase_polynomial import PhasePolynomialSynthesis
 from .transpilers.ucc_defaults import UCCDefault1
 
 import sys
@@ -24,6 +26,12 @@ if current_major != REQUIRED_MAJOR or not (
     )
 supported_circuit_formats = ConversionGraph().nodes()
 
+# Bounds the pass's run time, which parity-network synthesis dominates on
+# wide blocks. Wider blocks can still pay off (a QAOA cost layer on K64 drops
+# from 4,032 to 2,079 CNOTs, but compiles in 7.5 s instead of 0.09 s); run
+# PhasePolynomialSynthesis directly for a different limit.
+_PHASE_POLYNOMIAL_MAX_BLOCK_QUBITS = 32
+
 
 def compile(
     circuit,
@@ -32,6 +40,7 @@ def compile(
     target_backend=None,
     custom_passes=None,
     callback=None,
+    phase_polynomial_synthesis=False,
 ):
     """Compiles the provided quantum `circuit` by translating it to a Qiskit
     circuit, transpiling it, and returning the optimized circuit in the
@@ -58,6 +67,14 @@ def compile(
                     property_set (PropertySet): the property set
                     count (int): the index for the pass execution
 
+        phase_polynomial_synthesis (bool): (optional) Run
+            :class:`~ucc.transpilers.phase_polynomial.PhasePolynomialSynthesis`
+            on the input circuit before it is translated to the target
+            gateset. It resynthesizes controlled phase polynomials (such as
+            ``C-U^(2^k)`` with a diagonal ``U``) and blocks of CNOT and
+            phase gates, keeping each rewrite only if it lowers the CNOT
+            count. Defaults to False, which leaves compilation unchanged.
+
     Returns:
         object: The compiled circuit in the specified format.
     """
@@ -66,6 +83,15 @@ def compile(
 
     # Translate to Qiskit Circuit object
     qiskit_circuit = translate(circuit, "qiskit")
+
+    if phase_polynomial_synthesis:
+        qiskit_circuit = PassManager(
+            [
+                PhasePolynomialSynthesis(
+                    max_block_qubits=_PHASE_POLYNOMIAL_MAX_BLOCK_QUBITS
+                )
+            ]
+        ).run(qiskit_circuit)
 
     # Initialize the UCCDefault1 compiler with the target device and gateset
     ucc_default1 = UCCDefault1(
