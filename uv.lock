@@ -40,11 +40,11 @@ wheels = [
 
 [[package]]
 name = "autoray"
-version = "0.8.1"
+version = "0.11.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6c/8d/b7a7ce5332cc8c93e2d666ab9ab07b38727563cd680d48a889e6867c45fd/autoray-0.8.1.tar.gz", hash = "sha256:29c13c9552536388e366df563d4da15960b92da96b8809686b769d0bf5bdb4c2", size = 1215927, upload-time = "2025-10-28T00:21:20.344Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/33/0a894071f0635b9f9a208ba4eabc3af80b5316e51ec7de7ada89a2bf097e/autoray-0.11.0.tar.gz", hash = "sha256:ef9c23d8307f2e5030d10dd222d304401450157172a6fcc6f7456b6e82681bf4", size = 1385745, upload-time = "2026-08-22T21:57:23.007Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/05/47/b6d773c2ff44f11887d434716be7c99c1088d898b7f8f720e0ec9f7ca3fb/autoray-0.8.1-py3-none-any.whl", hash = "sha256:16b36bc2cd4e2e6fe8f75803ad95de9ced4aff91330662f7ccc371e5f446d4cd", size = 934389, upload-time = "2025-10-28T00:21:18.524Z" },
+    { url = "https://files.pythonhosted.org/packages/58/a1/7e82580da9ad8a2ed06306856d25bc9ebc737db9331f566590ee15b0d4ff/autoray-0.11.0-py3-none-any.whl", hash = "sha256:2e9ca95070834574e054162ee02946d2414f7821f65960308b95f49d08ee9227", size = 952870, upload-time = "2026-08-22T21:57:21.353Z" },
 ]
 
 [[package]]
@@ -209,14 +209,14 @@ wheels = [
 
 [[package]]
 name = "cotengra"
-version = "0.7.5"
+version = "0.8.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "autoray" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f2/42/041a65c3a12646156ae584a474a7843da977e51453403365aec9ec54bc7c/cotengra-0.7.5.tar.gz", hash = "sha256:f3cee6c0cd29fd239a1e9868c3b719c574cc56204dbf7e658ba10f3fd93dce98", size = 2830534, upload-time = "2025-06-12T23:53:13.954Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bc/97/7d53e9da9e0c1bdc9921fec178e1f66743d1b581619b918ba9123726c89d/cotengra-0.8.3.tar.gz", hash = "sha256:848ca60c61d932d1747774fe40d87de90c899d0327c7d6f90c5eff1d617126bc", size = 2506954, upload-time = "2026-10-21T00:00:28.577Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bd/0e/5356269a34f7860fb506b6690e74f4d0062e0e50bf6345fb5405e294b1ec/cotengra-0.7.5-py3-none-any.whl", hash = "sha256:0d269883ee87e4a08ce6c91ca38aafbd3d56e177a3b3b54d61e3fe314fe67e8b", size = 195379, upload-time = "2025-06-12T23:53:11.971Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/11/025ef597d23a702254f8212a4b32ce286fb786eecce0186f29360e21ffed/cotengra-0.8.3-py3-none-any.whl", hash = "sha256:51748e29714489d15f456055a69cb784c37e7215f0729108cdfd9ff74c00ae98", size = 254928, upload-time = "2026-10-21T00:00:26.606Z" },
 ]
 
 [[package]]
@@ -1238,7 +1238,7 @@ wheels = [
 
 [[package]]
 name = "quimb"
-version = "1.14.0"
+version = "1.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "autoray" },
@@ -1250,9 +1250,9 @@ dependencies = [
     { name = "scipy" },
     { name = "tqdm" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f1/ca/0a80995d046b079f34bd78f281ceaaa286a15b06f7afeccc43d7cb2efe1d/quimb-1.14.0.tar.gz", hash = "sha256:8c3706088ba76e281334f719b341d4630e63c36bf4fe53bbfb46325e506dcad3", size = 13882683, upload-time = "2026-05-11T00:27:17.405Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/79/b2/f8e13532d534a4e670c8adb2f350b5a257f9674f9c406cc63721d93740d6/quimb-1.16.0.tar.gz", hash = "sha256:b5ba4b7172fb516d053ed52150f8b04196fb13f1f226e9e691f61cf2de4b67f1", size = 16980777, upload-time = "2026-11-10T05:29:14.396Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/8c/c5/2175e1a8cd38dea77353a82e130a73a97061fa13f1a9e74dd89c35488db6/quimb-1.14.0-py3-none-any.whl", hash = "sha256:aca4bef42536db220bedc845b0fd030a0ce1fe20ae288449d7a9d0e4915ae94b", size = 2025761, upload-time = "2026-05-11T00:27:15.169Z" },
+    { url = "https://files.pythonhosted.org/packages/b8/be/138d3b632c42ab0e92d98b519fd6eb26c4da7b6a37deaf0f0503137b0a0f/quimb-1.16.0-py3-none-any.whl", hash = "sha256:33ba6bf3296131db78547682e8b13e5fcafcc99d365f7d25c9433c6ab6328d8d", size = 2161415, upload-time = "2026-11-10T05:29:12.327Z" },
 ]
 
 [[package]]
@@ -1630,7 +1630,7 @@ requires-dist = [
     { name = "qbraid", specifier = ">=0.9.3,<1.0.0" },
     { name = "qiskit", specifier = ">=1.4.2,<3.0.0" },
     { name = "qiskit-qasm3-import", specifier = ">=0.5.1,<1.0.0" },
-    { name = "quimb", specifier = "==1.14.0" },
+    { name = "quimb", specifier = "==1.16.0" },
 ]
 
 [package.metadata.requires-dev]
