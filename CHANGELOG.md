@@ -99,6 +99,7 @@ In version 0.4.9, we optimized the logic for target gateset selection, made infr
 * Fix links to research references in docs by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/455
 * Add codecov reporting by @bachase in https://github.com/unitaryfoundation/ucc/pull/465
 * add codecov badge to readme by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/467
+* Test for Merit systems automation by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/470 (Merit bounties have since been discontinued.)
 * Simplified and optimized logic for target gateset selection.  by @jordandsullivan in https://github.com/unitaryfoundation/ucc/pull/492
 ### 🔄 Dependencies
 By @dependabot
