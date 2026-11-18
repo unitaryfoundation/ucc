@@ -157,6 +157,45 @@ Alternatively, we can add our custom pass, as shown in the following example.
       circuit_to_compile, custom_passes=[MyCustomPass()]
    )
 
+An Optional Pass: PhasePolynomialSynthesis
+==========================================
+
+``PhasePolynomialSynthesis`` (in ``ucc.transpilers.phase_polynomial``) resynthesizes parts of a circuit built from CNOTs and diagonal phase gates as phase polynomials. It is exact, including global phase, and keeps each rewrite only if it lowers the CNOT count. It is off by default; pass ``phase_polynomial_synthesis=True`` to ``compile`` to run it on the input circuit before it is translated to the target gateset.
+
+It helps most on circuits written with high-level gates:
+
+* phase estimation with a diagonal unitary, where each controlled power ``C-U^(2^k)`` would otherwise be translated into ``2^k`` controlled copies of ``U``;
+* dense layers of commuting two-qubit phases, such as a QAOA cost layer on a complete graph, which a parity network realizes with fewer CNOTs than one ``CX RZ CX`` per term.
+
+On circuits that are already in the target gateset it rarely finds anything to rewrite, and it adds compile time.
+
+.. testcode:: phase_polynomial
+
+   from qiskit import QuantumCircuit
+   from qiskit.circuit.library import phase_estimation
+   from ucc import compile
+
+   unitary = QuantumCircuit(3)
+   unitary.rzz(0.4, 0, 1)
+   unitary.rzz(1.3, 1, 2)
+   unitary.rz(0.7, 2)
+   circuit = phase_estimation(6, unitary)
+
+   result = compile(circuit, phase_polynomial_synthesis=True)
+
+``compile`` leaves blocks on more than 32 qubits alone to bound compile time. To use a different limit, run the pass yourself before compiling:
+
+.. testcode:: phase_polynomial
+
+   from qiskit.transpiler import PassManager
+   from ucc.transpilers.phase_polynomial import PhasePolynomialSynthesis
+
+   rewritten = PassManager(
+       [PhasePolynomialSynthesis(max_block_qubits=64)]
+   ).run(circuit)
+   result = compile(rewritten)
+
+
 An Example of a Custom Pass: BQSKitTransformationPass
 =====================================================
 
